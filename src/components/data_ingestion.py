@@ -10,6 +10,7 @@ from dataclasses import dataclass  # To create simple classes for holding data/c
 
 from src.components.data_transformation import DataTransformation
 from src.components.data_transformation import DataTransformationConfig
+from src.components.model_trainer import ModelTrainer
 
 # Configuration class using @dataclass to define file paths for raw, train, and test data
 @dataclass
@@ -66,4 +67,8 @@ if __name__ == "__main__":
     train_data, test_data = obj.initiate_data_ingestion()  # Start ingestion process and get output paths
 
     data_transformation = DataTransformation()
-    data_transformation.initiate_data_transformation(train_data,test_data)
+    train_arr,test_arr,_ = data_transformation.initiate_data_transformation(train_data,test_data)
+
+    model_trainer = ModelTrainer()
+    model_trainer.initiate_model_trainer(train_arr,test_arr)
+
