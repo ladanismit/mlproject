@@ -1,0 +1,157 @@
+# Add New Features to Home Credit Default Risk Pipeline
+
+## Goal
+
+Add 7 new features from the original (`og_application_train.csv` / `og_application_test.csv`) datasets to the existing pipeline, then rewrite all 6 notebooks to reflect the expanded feature set.
+
+### New Features
+
+| # | Original Column | New Column/Transform | Type | Missing (Train) | Missing (Test) |
+|---|---|---|---|---|---|
+| 1 | `EXT_SOURCE_1` | `EXT_SOURCE_1` (as-is) | Numerical (float) | 173,378 (~56.4%) | 20,532 (~42.1%) |
+| 2 | `EXT_SOURCE_2` | `EXT_SOURCE_2` (as-is) | Numerical (float) | 660 (~0.2%) | 8 |
+| 3 | `EXT_SOURCE_3` | `EXT_SOURCE_3` (as-is) | Numerical (float) | 60,965 (~19.8%) | 8,668 (~17.8%) |
+| 4 | `DAYS_BIRTH` | → `AGE` = `abs(DAYS_BIRTH) / 365.25` | Numerical (float) | 0 | 0 |
+| 5 | `DAYS_EMPLOYED` | → `YEARS_EMPLOYED` = cleaned & converted | Numerical (float) | 0 | 0 |
+| 6 | `ORGANIZATION_TYPE` | `ORGANIZATION_TYPE` | Categorical (58 unique) | 0 | 0 |
+| 7 | `NAME_HOUSING_TYPE` | `NAME_HOUSING_TYPE` | Categorical (6 unique) | 0 | 0 |
+
+> [!IMPORTANT]
+> **`DAYS_EMPLOYED` anomaly**: The original data contains a value of `365243` (positive, ~1000 years) for unemployed/retired applicants. This must be replaced with `0` before converting to `YEARS_EMPLOYED = abs(DAYS_EMPLOYED) / 365.25`.
+
+> [!IMPORTANT]
+> **`EXT_SOURCE_1` has 56% missing values**. We will use median imputation (computed from train) for all three EXT_SOURCE columns, since they are the single most predictive features in the Home Credit dataset.
+
+---
+
+## Proposed Changes
+
+### Step 0 — Rebuild `application_train.csv` and `application_test.csv`
+
+We need a one-time script to re-extract the selected columns from the original zip-compressed CSVs. This script will:
+1. Read `og_application_train.csv` and `og_application_test.csv` (with `compression='zip'`)
+2. Select the **original 16 columns** + the **7 new raw columns** (`EXT_SOURCE_1`, `EXT_SOURCE_2`, `EXT_SOURCE_3`, `DAYS_BIRTH`, `DAYS_EMPLOYED`, `ORGANIZATION_TYPE`, `NAME_HOUSING_TYPE`)
+3. Save as `application_train.csv` and `application_test.csv` (overwriting existing)
+
+The `DAYS_BIRTH → AGE` and `DAYS_EMPLOYED → YEARS_EMPLOYED` conversions will happen in notebook 03 (preprocessing), not here, since the raw columns are the starting point.
+
+#### [NEW] `rebuild_datasets.py` — scratch script to rebuild the working CSVs
+
+---
+
+### Step 1 — Notebook 01: Data Understanding
+
+#### [MODIFY] [01_data_understanding.ipynb](file:///d:/MLPs/Home Credit Defaut Risk Predictor/01_data_understanding.ipynb)
+
+- Update shape output to reflect new column count (23 columns for train, 22 for test)
+- Update data types listing to include new columns
+- Update missing values section to show the new missing columns (`EXT_SOURCE_1`, `EXT_SOURCE_2`, `EXT_SOURCE_3`)
+- All existing content structure preserved
+
+---
+
+### Step 2 — Notebook 02: EDA
+
+#### [MODIFY] [02_eda.ipynb](file:///d:/MLPs/Home Credit Defaut Risk Predictor/02_eda.ipynb)
+
+- Update `numerical_features` list to include: `EXT_SOURCE_1`, `EXT_SOURCE_2`, `EXT_SOURCE_3`, `DAYS_BIRTH`, `DAYS_EMPLOYED`
+- Update `categorical_features` list to include: `ORGANIZATION_TYPE`, `NAME_HOUSING_TYPE`
+- All existing chart types (overview, missing values, target distribution, numerical vs TARGET, categorical vs TARGET, correlation heatmap) will be regenerated with the expanded feature set
+- Add EDA for `DAYS_EMPLOYED` anomaly (value 365243)
+
+---
+
+### Step 3 — Notebook 03: Data Preprocessing
+
+#### [MODIFY] [03_data_preprocessing.ipynb](file:///d:/MLPs/Home Credit Defaut Risk Predictor/03_data_preprocessing.ipynb)
+
+Missing value handling additions:
+| Column | Strategy | Reason |
+|---|---|---|
+| `EXT_SOURCE_1` | Median (from train) | 56% missing — median is robust |
+| `EXT_SOURCE_2` | Median (from train) | <0.2% missing |
+| `EXT_SOURCE_3` | Median (from train) | ~20% missing — median is robust |
+
+Feature transformations:
+| Transform | Action |
+|---|---|
+| `DAYS_BIRTH → AGE` | `AGE = abs(DAYS_BIRTH) / 365.25`, then drop `DAYS_BIRTH` |
+| `DAYS_EMPLOYED → YEARS_EMPLOYED` | Replace anomalous `365243` with `0`, then `YEARS_EMPLOYED = abs(DAYS_EMPLOYED) / 365.25`, then drop `DAYS_EMPLOYED` |
+
+Feature encoding additions:
+| Encoding | Column | Reason |
+|---|---|---|
+| **One-Hot** | `NAME_HOUSING_TYPE` | 6 categories, no inherent order |
+| **Frequency/Target Encoding** | `ORGANIZATION_TYPE` | 58 categories — too many for one-hot; use target encoding (mean of TARGET per category, computed on train only) |
+
+> [!NOTE]
+> For `ORGANIZATION_TYPE` with 58 unique values, one-hot encoding would add 57 columns. We'll use **target encoding** instead (replacing each category with the mean default rate from the training set). This is more compact and often more predictive for high-cardinality categoricals.
+
+Output: updated `train_preprocessed.csv` and `test_preprocessed.csv`
+
+---
+
+### Step 4 — Notebook 04: Feature Engineering
+
+#### [MODIFY] [04_feature_engineering.ipynb](file:///d:/MLPs/Home Credit Defaut Risk Predictor/04_feature_engineering.ipynb)
+
+Keep existing 4 engineered features:
+1. `CREDIT_INCOME_RATIO`
+2. `ANNUITY_INCOME_RATIO`
+3. `CREDIT_GOODS_RATIO`
+4. `INCOME_PER_CHILD`
+
+Add new engineered features:
+| # | New Feature | Formula | Business Meaning |
+|---|---|---|---|
+| 5 | `EXT_SOURCE_MEAN` | `mean(EXT_SOURCE_1, EXT_SOURCE_2, EXT_SOURCE_3)` | Average external credit score — composite creditworthiness |
+| 6 | `CREDIT_TERM` | `AMT_CREDIT / AMT_ANNUITY` | Estimated loan duration in payment periods |
+| 7 | `EMPLOYED_TO_AGE_RATIO` | `YEARS_EMPLOYED / AGE` | Job stability relative to age |
+
+Output: updated `train_fe.csv` and `test_fe.csv`
+
+---
+
+### Step 5 — Notebook 05: Baseline Models
+
+#### [MODIFY] [05_baseline_models.ipynb](file:///d:/MLPs/Home Credit Defaut Risk Predictor/05_baseline_models.ipynb)
+
+- No structural changes needed — the notebook reads `train_fe.csv` and auto-detects columns
+- Rewrite/re-run to get updated baseline metrics with the expanded feature set
+- Same 3 models: Logistic Regression, Random Forest, XGBoost
+- Same evaluation framework (Precision, Recall, F1, ROC-AUC)
+
+---
+
+### Step 6 — Notebook 06: Hyperparameter Tuning
+
+#### [MODIFY] [06_hyperparameter_tuning.ipynb](file:///d:/MLPs/Home Credit Defaut Risk Predictor/06_hyperparameter_tuning.ipynb)
+
+- No structural changes needed — same 3 models, same RandomizedSearchCV approach
+- Rewrite/re-run to get tuned metrics with expanded feature set
+- Same visual comparison (bar charts, ROC curves)
+
+---
+
+## Open Questions
+
+> [!IMPORTANT]
+> **Target encoding for `ORGANIZATION_TYPE`**: With 58 unique values, one-hot encoding adds 57 columns (mostly sparse). I propose using target encoding (mean TARGET rate per category from training data) instead. This is more compact and often more effective. **Do you approve, or would you prefer one-hot encoding regardless of the high cardinality?**
+
+> [!IMPORTANT]
+> **Additional engineered features**: I propose 3 new engineered features (`EXT_SOURCE_MEAN`, `CREDIT_TERM`, `EMPLOYED_TO_AGE_RATIO`) to leverage the new raw columns. These are well-known high-signal features in the Home Credit competition. **Do you want these, or should I only add the 7 raw features you listed?**
+
+---
+
+## Verification Plan
+
+### Automated Tests
+- Run each notebook sequentially (01 → 06) via Python/Jupyter
+- Verify zero missing values after preprocessing (notebook 03)
+- Verify zero NaN/Inf in engineered features (notebook 04)
+- Compare old vs new ROC-AUC scores to confirm improvement
+
+### Manual Verification
+- Inspect output shapes at each step
+- Review EDA plots for the new features
+- Confirm model comparison tables show metrics for all 3 models
