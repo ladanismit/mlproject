@@ -3,19 +3,34 @@
 This module manages the complete model training lifecycle, handling dataset retrieval,
 model instantiation, callback configuration (EarlyStopping, ModelCheckpoint,
 ReduceLROnPlateau, CSVLogger, TensorBoard), model training, final model serialization,
-and comprehensive validation reporting (Confusion Matrix, Precision, Recall, F1).
-
-This module follows the Single Responsibility Principle, focusing solely on
-the orchestration of training, checkpointing, and evaluation.
+and comprehensive model verification and reporting (history logs, JSON metadata,
+confusion matrices, accuracy/loss curves).
 """
 
+import datetime
+import json
 import logging
 import sys
 from pathlib import Path
 from typing import Tuple, Optional
 import numpy as np
+import pandas as pd
 import tensorflow as tf
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.metrics import classification_report, confusion_matrix
+
+# ------------------------------------------------------------------------------
+# 0. DESERIALIZATION MONKEYPATCH FOR KERAS 3 / TF 2.16+
+# ------------------------------------------------------------------------------
+# Pop quantization_config argument during Dense initialization to prevent
+# "TypeError: Unrecognized keyword arguments passed to Dense" when loading models.
+original_dense_init = tf.keras.layers.Dense.__init__
+def patched_dense_init(self, *args, **kwargs):
+    kwargs.pop("quantization_config", None)
+    original_dense_init(self, *args, **kwargs)
+tf.keras.layers.Dense.__init__ = patched_dense_init
+
 
 # Add project root to sys.path to enable running the script directly
 project_root = Path(__file__).resolve().parent.parent
@@ -29,12 +44,19 @@ from src.config import (
     LEARNING_RATE,
     BEST_MODEL_PATH,
     FINAL_MODEL_PATH,
+    METADATA_PATH,
+    HISTORY_PATH,
+    CONFUSION_MATRIX_PATH,
+    CLASSIFICATION_REPORT_PATH,
+    ACCURACY_CURVE_PATH,
+    LOSS_CURVE_PATH,
     LOGS_DIR,
     CLASSES,
 )
 
 # Import dataset loader and model builder/compiler
 from src.dataset import get_datasets
+from src.data_loader import load_dataset
 from src.model import build_model, compile_model, print_model_summary
 
 # Configure logging
@@ -154,42 +176,95 @@ def evaluate_and_log_metrics(
     model: tf.keras.Model,
     dataset: tf.data.Dataset,
     dataset_name: str = "Validation",
-) -> None:
+) -> Tuple[float, float]:
     """Evaluates model performance and prints loss, accuracy, confusion matrix, and F1 metrics.
 
     Args:
-        model (tf.keras.Model): The model to evaluate (in inference mode).
+        model (tf.keras.Model): The model to evaluate.
         dataset (tf.data.Dataset): The dataset to evaluate.
         dataset_name (str): Label describing the dataset (e.g. "Validation").
+
+    Returns:
+        Tuple[float, float]: Calculated (loss, accuracy).
     """
     logger.info(f"Evaluating model performance on {dataset_name} set...")
 
     # 1. Evaluate general loss and accuracy
     loss, accuracy = model.evaluate(dataset, verbose=0)
     logger.info(f"[{dataset_name}] Loss: {loss:.4f}, Accuracy: {accuracy:.4f}")
+    return float(loss), float(accuracy)
 
-    # 2. Extract true labels and model predictions
+
+def save_reports_and_plots(
+    model: tf.keras.Model,
+    val_dataset: tf.data.Dataset,
+    history: tf.keras.callbacks.History,
+) -> None:
+    """Plots and writes metrics artifacts: curves, reports, and confusion matrix.
+
+    Args:
+        model (tf.keras.Model): The reloaded best model for report validation.
+        val_dataset (tf.data.Dataset): Validation dataset.
+        history (tf.keras.callbacks.History): Training history object.
+    """
+    logger.info("Generating and saving reports and visual plots...")
+    
+    # 1. Get predictions for validation set
     y_true = []
     y_pred = []
-
-    for images, labels in dataset:
+    for images, labels in val_dataset:
         preds = model.predict(images, verbose=0)
-        # Extract class index with highest probability
         pred_indices = np.argmax(preds, axis=-1)
-
         y_true.extend(labels.numpy())
         y_pred.extend(pred_indices)
-
     y_true = np.array(y_true)
     y_pred = np.array(y_pred)
 
-    # 3. Compute Confusion Matrix
+    # 2. Save Confusion Matrix plot
     cm = confusion_matrix(y_true, y_pred)
-    logger.info(f"\n[{dataset_name}] Confusion Matrix:\n{cm}")
+    plt.figure(figsize=(6, 5))
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=CLASSES, yticklabels=CLASSES)
+    plt.title("Validation Confusion Matrix")
+    plt.ylabel("True Label")
+    plt.xlabel("Predicted Label")
+    plt.tight_layout()
+    plt.savefig(str(CONFUSION_MATRIX_PATH), dpi=150)
+    plt.close()
+    logger.info(f"Confusion Matrix saved to: {CONFUSION_MATRIX_PATH}")
 
-    # 4. Generate Classification Report (Precision, Recall, F1)
+    # 3. Save Textual Classification Report
     report = classification_report(y_true, y_pred, target_names=CLASSES, zero_division=0)
-    logger.info(f"\n[{dataset_name}] Classification Report:\n{report}")
+    with open(CLASSIFICATION_REPORT_PATH, "w") as f:
+        f.write(report)
+    logger.info(f"Classification report saved to: {CLASSIFICATION_REPORT_PATH}")
+
+    # 4. Save Accuracy Curve
+    plt.figure(figsize=(8, 5))
+    plt.plot(history.history["accuracy"], label="Train Accuracy")
+    plt.plot(history.history["val_accuracy"], label="Val Accuracy")
+    plt.title("Model Training and Validation Accuracy")
+    plt.ylabel("Accuracy")
+    plt.xlabel("Epoch")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(str(ACCURACY_CURVE_PATH), dpi=150)
+    plt.close()
+    logger.info(f"Accuracy curve saved to: {ACCURACY_CURVE_PATH}")
+
+    # 5. Save Loss Curve
+    plt.figure(figsize=(8, 5))
+    plt.plot(history.history["loss"], label="Train Loss")
+    plt.plot(history.history["val_loss"], label="Val Loss")
+    plt.title("Model Training and Validation Loss")
+    plt.ylabel("Loss")
+    plt.xlabel("Epoch")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(str(LOSS_CURVE_PATH), dpi=150)
+    plt.close()
+    logger.info(f"Loss curve saved to: {LOSS_CURVE_PATH}")
 
 
 def run_training_pipeline(
@@ -216,8 +291,8 @@ def run_training_pipeline(
 
     try:
         # 1. Get datasets
-        logger.info("Loading training and validation datasets...")
-        train_ds, val_ds, _ = get_datasets(batch_size=BATCH_SIZE)
+        logger.info("Loading training, validation, and test datasets...")
+        train_ds, val_ds, test_ds = get_datasets(batch_size=BATCH_SIZE)
 
         # 2. Build and compile model
         logger.info("Building and compiling model...")
@@ -243,16 +318,68 @@ def run_training_pipeline(
         trained_model.save(str(final_filepath))
         logger.info("Final model saved successfully.")
 
-        # 6. Verify serialization by loading the saved model and evaluating it
-        logger.info("Verifying saved checkpoints...")
-        if checkpoint_filepath.exists():
-            logger.info("Loading best checkpoint model from disk...")
-            best_model = tf.keras.models.load_model(str(checkpoint_filepath))
-            evaluate_and_log_metrics(best_model, val_ds, dataset_name="Checkpoint Best Model")
+        # 6. Save history log CSV
+        logger.info(f"Saving training history to: {HISTORY_PATH}")
+        history_df = pd.DataFrame(history.history)
+        history_df.to_csv(HISTORY_PATH, index=True, index_label="epoch")
+
+        # 7. Model Verification Process
+        logger.info("=" * 60)
+        logger.info("STARTING POST-TRAINING MODEL VERIFICATION")
+        logger.info("=" * 60)
         
-        logger.info("Loading final saved model from disk...")
-        loaded_final_model = tf.keras.models.load_model(str(final_filepath))
-        evaluate_and_log_metrics(loaded_final_model, val_ds, dataset_name="Final Saved Model")
+        # Load best checkpoint model from disk directly
+        logger.info(f"Loading best checkpoint model directly from disk: {checkpoint_filepath}")
+        reloaded_model = tf.keras.models.load_model(str(checkpoint_filepath))
+        
+        # Evaluate both models on the test dataset
+        loss_orig, acc_orig = evaluate_and_log_metrics(trained_model, test_ds, dataset_name="In-Memory Model")
+        loss_reloaded, acc_reloaded = evaluate_and_log_metrics(reloaded_model, test_ds, dataset_name="Reloaded Model")
+        
+        # Compare prediction distributions using np.allclose
+        logger.info("Extracting prediction tensors for similarity comparison...")
+        preds_orig = trained_model.predict(test_ds, verbose=0)
+        preds_reloaded = reloaded_model.predict(test_ds, verbose=0)
+        match_status = bool(np.allclose(preds_orig, preds_reloaded, atol=1e-5))
+        
+        integrity_status = "VERIFIED" if match_status else "FAILED"
+        
+        # Print Verification Summary
+        print("\n" + "=" * 60)
+        print("MODEL VERIFICATION SUMMARY")
+        print("=" * 60)
+        print(f"Original Model Test Accuracy:  {acc_orig*100:.2f}% (Loss: {loss_orig:.4f})")
+        print(f"Reloaded Model Test Accuracy:  {acc_reloaded*100:.2f}% (Loss: {loss_reloaded:.4f})")
+        print(f"Prediction Outputs Match:      {match_status}")
+        print(f"Model Integrity Status:        {integrity_status}")
+        print("=" * 60 + "\n")
+        
+        logger.info(f"Model verification finished. Status: {integrity_status}")
+
+        # 8. Save Reports, Confusion Matrix, and Curves
+        save_reports_and_plots(reloaded_model, val_ds, history)
+
+        # 9. Save Metadata JSON file
+        logger.info(f"Saving training metadata to: {METADATA_PATH}")
+        metadata = {
+            "model_name": trained_model.name,
+            "dataset_size": len(load_dataset()),
+            "epochs": target_epochs,
+            "batch_size": BATCH_SIZE,
+            "learning_rate": LEARNING_RATE,
+            "train_accuracy": float(history.history["accuracy"][-1]),
+            "validation_accuracy": float(history.history["val_accuracy"][-1]),
+            "test_accuracy": acc_reloaded,
+            "train_loss": float(history.history["loss"][-1]),
+            "validation_loss": float(history.history["val_loss"][-1]),
+            "test_loss": loss_reloaded,
+            "timestamp": datetime.datetime.now().isoformat(),
+            "class_names": CLASSES,
+            "integrity_status": integrity_status,
+        }
+        with open(METADATA_PATH, "w") as f:
+            json.dump(metadata, f, indent=4)
+        logger.info("Metadata saved successfully.")
 
         return trained_model, history
 

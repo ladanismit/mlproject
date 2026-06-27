@@ -33,6 +33,8 @@ else:
 
 # Models and outputs
 MODELS_DIR = PROJECT_ROOT / "models"
+EXPERIMENT_NAME = "experiment_v1"
+EXPERIMENT_DIR = MODELS_DIR / EXPERIMENT_NAME
 CHECKPOINT_DIR = MODELS_DIR / "checkpoints"
 OUTPUTS_DIR = PROJECT_ROOT / "outputs"
 LOGS_DIR = OUTPUTS_DIR / "logs"
@@ -47,6 +49,7 @@ directories = [
     PROCESSED_DATA_DIR,
     SPLITS_DIR,
     MODELS_DIR,
+    EXPERIMENT_DIR,
     CHECKPOINT_DIR,
     OUTPUTS_DIR,
     LOGS_DIR,
@@ -123,8 +126,14 @@ VALIDATION_SPLIT = 0.2
 # 5. MODEL SAVING CONFIGURATION
 # ==============================================================================
 # Specific paths for storing model checkpoints and final models
-BEST_MODEL_PATH = MODELS_DIR / "best_model.keras"
-FINAL_MODEL_PATH = MODELS_DIR / "final_model.keras"
+BEST_MODEL_PATH = EXPERIMENT_DIR / "best_model.keras"
+FINAL_MODEL_PATH = EXPERIMENT_DIR / "final_model.keras"
+METADATA_PATH = EXPERIMENT_DIR / "training_info.json"
+HISTORY_PATH = EXPERIMENT_DIR / "history.csv"
+CONFUSION_MATRIX_PATH = EXPERIMENT_DIR / "confusion_matrix.png"
+CLASSIFICATION_REPORT_PATH = EXPERIMENT_DIR / "classification_report.txt"
+ACCURACY_CURVE_PATH = EXPERIMENT_DIR / "accuracy_curve.png"
+LOSS_CURVE_PATH = EXPERIMENT_DIR / "loss_curve.png"
 
 
 # ==============================================================================
