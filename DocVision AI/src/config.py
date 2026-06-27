@@ -9,17 +9,6 @@ Simply append the new class names to the `CLASSES` list in the Dataset Configura
 """
 
 from pathlib import Path
-import torch
-
-
-IS_KAGGLE = Path("/kaggle").exists()
-
-if IS_KAGGLE:
-    RAW_DATA_DIR = Path(
-        "/kaggle/input/datasets/smitladani/docvision-dataset/docvision-dataset"
-    )
-else:
-    RAW_DATA_DIR = PROJECT_ROOT / "data" / "raw"
 
 # ==============================================================================
 # 1. PATH CONFIGURATION (Pathlib based)
@@ -32,6 +21,15 @@ DATA_DIR = PROJECT_ROOT / "data"
 RAW_DATA_DIR = DATA_DIR / "raw"
 PROCESSED_DATA_DIR = DATA_DIR / "processed"
 SPLITS_DIR = DATA_DIR / "splits"
+
+IS_KAGGLE = Path("/kaggle").exists()
+
+if IS_KAGGLE:
+    RAW_DATA_DIR = Path(
+        "/kaggle/input/datasets/smitladani/docvision-dataset/docvision-dataset"
+    )
+else:
+    RAW_DATA_DIR = PROJECT_ROOT / "data" / "raw"
 
 # Models and outputs
 MODELS_DIR = PROJECT_ROOT / "models"
@@ -111,14 +109,6 @@ SUPPORTED_EXTENSIONS = {
 # Reproducibility
 RANDOM_SEED = 42
 
-# Hardware acceleration setup
-DEVICE = torch.device(
-    "cuda"
-    if torch.cuda.is_available()
-    else "mps"
-    if torch.backends.mps.is_available()
-    else "cpu"
-)
 
 # Optimization parameters
 BATCH_SIZE = 32
@@ -146,7 +136,6 @@ def print_config_summary() -> None:
     print("DocVision-AI Configuration Summary")
     print("=" * 60)
     print(f"Project Root:       {PROJECT_ROOT}")
-    print(f"Device:             {DEVICE}")
     print(f"Classes:            {CLASSES} (Total: {NUM_CLASSES})")
     print(f"Image Size:         {IMAGE_SIZE} (Channels: {IMAGE_CHANNELS})")
     print(f"Training Epochs:    {EPOCHS}")
