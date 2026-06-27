@@ -179,7 +179,7 @@ def main():
     parser.add_argument(
         "--image",
         type=str,
-        default=r"D:\MLPs\DocVision AI\data\raw\Invoice\X51005442344.jpg",
+        default=r"D:\MLPs\DocVision AI\data\raw\test\X51005433518.jpg",
         help="Path to the document image file (JPG, PNG, BMP, TIFF, etc.)",
     )
     parser.add_argument(

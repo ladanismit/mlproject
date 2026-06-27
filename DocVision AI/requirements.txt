@@ -1,5 +1,5 @@
 # Core ML and Deep Learning
-tensorflow
+tensorflow==2.19.0
 torch
 torchvision
 torchaudio
@@ -7,7 +7,7 @@ transformers
 accelerate
 datasets
 evaluate
-
+keras==3.13.2
 # Computer Vision & Image Processing
 opencv-python
 Pillow
