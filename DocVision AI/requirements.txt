@@ -1,0 +1,29 @@
+# Core ML and Deep Learning
+tensorflow
+torch
+torchvision
+torchaudio
+transformers
+accelerate
+datasets
+evaluate
+
+# Computer Vision & Image Processing
+opencv-python
+Pillow
+albumentations
+pytesseract
+pdf2image
+
+# Data Processing & Utilities
+numpy
+pandas
+scikit-learn
+tqdm
+tensorboard
+
+# Visualization & Notebook Development
+matplotlib
+seaborn
+jupyterlab
+pydot
