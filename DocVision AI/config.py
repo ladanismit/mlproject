@@ -15,7 +15,9 @@ import torch
 IS_KAGGLE = Path("/kaggle").exists()
 
 if IS_KAGGLE:
-    RAW_DATA_DIR = Path("/kaggle/input/docvision-dataset")
+    RAW_DATA_DIR = Path(
+        "/kaggle/input/datasets/smitladani/docvision-dataset/docvision-dataset"
+    )
 else:
     RAW_DATA_DIR = PROJECT_ROOT / "data" / "raw"
 
