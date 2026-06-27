@@ -11,6 +11,16 @@ Simply append the new class names to the `CLASSES` list in the Dataset Configura
 from pathlib import Path
 import torch
 
+
+IS_KAGGLE = Path("/kaggle").exists()
+
+if IS_KAGGLE:
+    RAW_DATA_DIR = Path(
+        "/kaggle/input/datasets/smitladani/docvision-dataset/docvision-dataset"
+    )
+else:
+    RAW_DATA_DIR = PROJECT_ROOT / "data" / "raw"
+
 # ==============================================================================
 # 1. PATH CONFIGURATION (Pathlib based)
 # ==============================================================================
