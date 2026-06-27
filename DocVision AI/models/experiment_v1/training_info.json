@@ -1,0 +1,19 @@
+{
+    "model_name": "docvision_cnn",
+    "dataset_size": 1252,
+    "epochs": 20,
+    "batch_size": 32,
+    "learning_rate": 0.0001,
+    "train_accuracy": 0.9965753555297852,
+    "validation_accuracy": 0.9946808218955994,
+    "test_accuracy": 0.9946808218955994,
+    "train_loss": 0.02602754533290863,
+    "validation_loss": 0.02089967578649521,
+    "test_loss": 0.01724284328520298,
+    "timestamp": "2026-06-27T17:00:26.948941",
+    "class_names": [
+        "Resume",
+        "Invoice"
+    ],
+    "integrity_status": "VERIFIED"
+}
