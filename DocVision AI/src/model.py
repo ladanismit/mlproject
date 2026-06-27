@@ -83,19 +83,19 @@ def build_model(
 
             # Conv Block 1
             layers.Conv2D(filters=32, kernel_size=(3, 3), padding="same", name="conv_block1_conv"),
-            layers.BatchNormalization(name="conv_block1_bn"),
+            layers.LayerNormalization(axis=-1, name="conv_block1_ln"),
             layers.ReLU(name="conv_block1_relu"),
             layers.MaxPooling2D(pool_size=(2, 2), name="conv_block1_pool"),
 
             # Conv Block 2
             layers.Conv2D(filters=64, kernel_size=(3, 3), padding="same", name="conv_block2_conv"),
-            layers.BatchNormalization(name="conv_block2_bn"),
+            layers.LayerNormalization(axis=-1, name="conv_block2_ln"),
             layers.ReLU(name="conv_block2_relu"),
             layers.MaxPooling2D(pool_size=(2, 2), name="conv_block2_pool"),
 
             # Conv Block 3
             layers.Conv2D(filters=128, kernel_size=(3, 3), padding="same", name="conv_block3_conv"),
-            layers.BatchNormalization(name="conv_block3_bn"),
+            layers.LayerNormalization(axis=-1, name="conv_block3_ln"),
             layers.ReLU(name="conv_block3_relu"),
             layers.MaxPooling2D(pool_size=(2, 2), name="conv_block3_pool"),
 

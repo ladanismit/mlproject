@@ -2,17 +2,20 @@
 
 This module manages the complete model training lifecycle, handling dataset retrieval,
 model instantiation, callback configuration (EarlyStopping, ModelCheckpoint,
-ReduceLROnPlateau, CSVLogger), model training, and final model serialization.
+ReduceLROnPlateau, CSVLogger, TensorBoard), model training, final model serialization,
+and comprehensive validation reporting (Confusion Matrix, Precision, Recall, F1).
 
 This module follows the Single Responsibility Principle, focusing solely on
-the orchestration of training and checkpointing.
+the orchestration of training, checkpointing, and evaluation.
 """
 
 import logging
 import sys
 from pathlib import Path
 from typing import Tuple, Optional
+import numpy as np
 import tensorflow as tf
+from sklearn.metrics import classification_report, confusion_matrix
 
 # Add project root to sys.path to enable running the script directly
 project_root = Path(__file__).resolve().parent.parent
@@ -27,6 +30,7 @@ from src.config import (
     BEST_MODEL_PATH,
     FINAL_MODEL_PATH,
     LOGS_DIR,
+    CLASSES,
 )
 
 # Import dataset loader and model builder/compiler
@@ -48,7 +52,7 @@ def get_callbacks(
     """Configures and returns production-ready TensorFlow/Keras callbacks.
 
     Includes EarlyStopping, ModelCheckpoint (saving the best model),
-    ReduceLROnPlateau, and CSVLogger.
+    ReduceLROnPlateau, CSVLogger, and TensorBoard logger.
 
     Args:
         checkpoint_filepath (Path): Filepath where the best model checkpoint will be saved.
@@ -90,6 +94,11 @@ def get_callbacks(
             filename=str(log_filepath),
             separator=",",
             append=False,
+        ),
+        tf.keras.callbacks.TensorBoard(
+            log_dir=str(log_filepath.parent / "tensorboard"),
+            histogram_freq=1,
+            update_freq="epoch",
         ),
     ]
     return callbacks
@@ -141,13 +150,55 @@ def train_model(
         raise RuntimeError(f"Training failed: {e}") from e
 
 
+def evaluate_and_log_metrics(
+    model: tf.keras.Model,
+    dataset: tf.data.Dataset,
+    dataset_name: str = "Validation",
+) -> None:
+    """Evaluates model performance and prints loss, accuracy, confusion matrix, and F1 metrics.
+
+    Args:
+        model (tf.keras.Model): The model to evaluate (in inference mode).
+        dataset (tf.data.Dataset): The dataset to evaluate.
+        dataset_name (str): Label describing the dataset (e.g. "Validation").
+    """
+    logger.info(f"Evaluating model performance on {dataset_name} set...")
+
+    # 1. Evaluate general loss and accuracy
+    loss, accuracy = model.evaluate(dataset, verbose=0)
+    logger.info(f"[{dataset_name}] Loss: {loss:.4f}, Accuracy: {accuracy:.4f}")
+
+    # 2. Extract true labels and model predictions
+    y_true = []
+    y_pred = []
+
+    for images, labels in dataset:
+        preds = model.predict(images, verbose=0)
+        # Extract class index with highest probability
+        pred_indices = np.argmax(preds, axis=-1)
+
+        y_true.extend(labels.numpy())
+        y_pred.extend(pred_indices)
+
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+
+    # 3. Compute Confusion Matrix
+    cm = confusion_matrix(y_true, y_pred)
+    logger.info(f"\n[{dataset_name}] Confusion Matrix:\n{cm}")
+
+    # 4. Generate Classification Report (Precision, Recall, F1)
+    report = classification_report(y_true, y_pred, target_names=CLASSES, zero_division=0)
+    logger.info(f"\n[{dataset_name}] Classification Report:\n{report}")
+
+
 def run_training_pipeline(
     epochs: Optional[int] = None,
 ) -> Tuple[tf.keras.Model, tf.keras.callbacks.History]:
     """Orchestrates the entire training pipeline.
 
     Loads data, builds and compiles the model, configures callbacks, trains the
-    model, saves the final model, and returns results.
+    model, evaluates performance, and saves/verifies the serialized checkpoints.
 
     Args:
         epochs (Optional[int]): Number of epochs to train. If None, uses EPOCHS from config.
@@ -157,34 +208,27 @@ def run_training_pipeline(
     """
     logger.info("Initializing DocVision-AI Training Pipeline...")
 
-    # 1. Resolve paths (use .keras suffix if config path has .pth PyTorch extension)
     checkpoint_filepath = BEST_MODEL_PATH
-    if checkpoint_filepath.suffix == ".pth":
-        checkpoint_filepath = checkpoint_filepath.with_suffix(".keras")
-
     final_filepath = FINAL_MODEL_PATH
-    if final_filepath.suffix == ".pth":
-        final_filepath = final_filepath.with_suffix(".keras")
-
     log_filepath = LOGS_DIR / "training_log.csv"
     
     target_epochs = epochs if epochs is not None else EPOCHS
 
     try:
-        # 2. Get datasets
+        # 1. Get datasets
         logger.info("Loading training and validation datasets...")
         train_ds, val_ds, _ = get_datasets(batch_size=BATCH_SIZE)
 
-        # 3. Build and compile model
+        # 2. Build and compile model
         logger.info("Building and compiling model...")
         model = build_model()
         print_model_summary(model)
         compiled_model = compile_model(model, learning_rate=LEARNING_RATE)
 
-        # 4. Get callbacks
+        # 3. Get callbacks
         callbacks = get_callbacks(checkpoint_filepath, log_filepath)
 
-        # 5. Train model
+        # 4. Train model
         trained_model, history = train_model(
             model=compiled_model,
             train_dataset=train_ds,
@@ -193,11 +237,22 @@ def run_training_pipeline(
             callbacks=callbacks,
         )
 
-        # 6. Save final model
+        # 5. Save final model
         logger.info(f"Saving final trained model to: {final_filepath}")
         final_filepath.parent.mkdir(parents=True, exist_ok=True)
         trained_model.save(str(final_filepath))
         logger.info("Final model saved successfully.")
+
+        # 6. Verify serialization by loading the saved model and evaluating it
+        logger.info("Verifying saved checkpoints...")
+        if checkpoint_filepath.exists():
+            logger.info("Loading best checkpoint model from disk...")
+            best_model = tf.keras.models.load_model(str(checkpoint_filepath))
+            evaluate_and_log_metrics(best_model, val_ds, dataset_name="Checkpoint Best Model")
+        
+        logger.info("Loading final saved model from disk...")
+        loaded_final_model = tf.keras.models.load_model(str(final_filepath))
+        evaluate_and_log_metrics(loaded_final_model, val_ds, dataset_name="Final Saved Model")
 
         return trained_model, history
 

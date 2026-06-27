@@ -123,8 +123,8 @@ VALIDATION_SPLIT = 0.2
 # 5. MODEL SAVING CONFIGURATION
 # ==============================================================================
 # Specific paths for storing model checkpoints and final models
-BEST_MODEL_PATH = MODELS_DIR / "best_model.pth"
-FINAL_MODEL_PATH = MODELS_DIR / "final_model.pth"
+BEST_MODEL_PATH = MODELS_DIR / "best_model.keras"
+FINAL_MODEL_PATH = MODELS_DIR / "final_model.keras"
 
 
 # ==============================================================================

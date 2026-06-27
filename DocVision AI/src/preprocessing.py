@@ -108,19 +108,49 @@ def handle_grayscale(image: np.ndarray, target_channels: int = IMAGE_CHANNELS) -
     return image
 
 
-def resize_image(image: np.ndarray, target_size: Tuple[int, int] = IMAGE_SIZE) -> np.ndarray:
-    """Resizes the image array to the configured dimensions.
+def resize_image(
+    image: np.ndarray,
+    target_size: Tuple[int, int] = IMAGE_SIZE,
+    pad_color: int = 255,
+) -> np.ndarray:
+    """Resizes an image preserving its aspect ratio and pads it with a background color.
+
+    Prevents squashing or stretching document layout features. Uses white padding (255)
+    by default to match standard document background colors.
 
     Args:
         image (np.ndarray): Input image array.
-        target_size (Tuple[int, int]): A tuple (height, width) specifying the target dimensions.
+        target_size (Tuple[int, int]): A tuple (target_height, target_width) of desired dimensions.
+        pad_color (int): Background padding color (0-255). Defaults to 255 (white).
 
     Returns:
-        np.ndarray: Resized image array.
+        np.ndarray: Resized and padded image.
     """
     target_height, target_width = target_size
-    # OpenCV's cv2.resize expects (width, height) order for the size argument
-    return cv2.resize(image, (target_width, target_height), interpolation=cv2.INTER_AREA)
+    h, w = image.shape[:2]
+
+    # Calculate scaling factor
+    scale = min(target_height / h, target_width / w)
+    new_h, new_w = int(round(h * scale)), int(round(w * scale))
+
+    # Resize retaining aspect ratio
+    resized = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_AREA)
+
+    # Initialize padded canvas
+    if len(image.shape) == 3:
+        channels = image.shape[2]
+        padded = np.full((target_height, target_width, channels), pad_color, dtype=image.dtype)
+    else:
+        padded = np.full((target_height, target_width), pad_color, dtype=image.dtype)
+
+    # Offset to center the image
+    dy = (target_height - new_h) // 2
+    dx = (target_width - new_w) // 2
+
+    # Paste resized image into the canvas
+    padded[dy:dy + new_h, dx:dx + new_w] = resized
+
+    return padded
 
 
 def normalize_image(image: np.ndarray) -> np.ndarray:
