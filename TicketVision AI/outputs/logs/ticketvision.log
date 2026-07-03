@@ -1,0 +1,141 @@
+2026-07-03 22:51:37 | ticketvision.data_loader | INFO     | Loading dataset from: D:\MLPs\TicketVision AI\data\raw\customer_support_tickets_200k.csv
+2026-07-03 22:51:38 | ticketvision.data_loader | INFO     | Dataset loaded successfully.
+2026-07-03 22:51:38 | ticketvision.data_loader | INFO     | Column validation passed — all required columns present.
+2026-07-03 22:51:38 | ticketvision.data_loader | INFO     | Dataset shape    : 200,000 rows x 3 columns.
+2026-07-03 22:51:38 | ticketvision.data_loader | INFO     | Data types:
+2026-07-03 22:51:38 | ticketvision.data_loader | INFO     |   product                   : object
+2026-07-03 22:51:38 | ticketvision.data_loader | INFO     |   category                  : object
+2026-07-03 22:51:38 | ticketvision.data_loader | INFO     |   issue_description         : object
+2026-07-03 22:51:38 | ticketvision.data_loader | INFO     | Missing values   : None detected.
+2026-07-03 22:51:38 | ticketvision.data_loader | WARNING  | Duplicate rows   : 199000 (99.50% of dataset).
+2026-07-03 22:51:38 | ticketvision.data_loader | INFO     | Class distribution (10 unique categories):
+2026-07-03 22:51:38 | ticketvision.data_loader | INFO     |   Feature Request                :  20169  (10.08%)
+2026-07-03 22:51:38 | ticketvision.data_loader | INFO     |   Subscription Cancellation      :  20096  (10.05%)
+2026-07-03 22:51:38 | ticketvision.data_loader | INFO     |   Performance Issue              :  20074  (10.04%)
+2026-07-03 22:51:38 | ticketvision.data_loader | INFO     |   Security Concern               :  20040  (10.02%)
+2026-07-03 22:51:38 | ticketvision.data_loader | INFO     |   Login Issue                    :  20002  (10.00%)
+2026-07-03 22:51:38 | ticketvision.data_loader | INFO     |   Payment Problem                :  19997  (10.00%)
+2026-07-03 22:51:38 | ticketvision.data_loader | INFO     |   Bug Report                     :  19981  ( 9.99%)
+2026-07-03 22:51:38 | ticketvision.data_loader | INFO     |   Refund Request                 :  19900  ( 9.95%)
+2026-07-03 22:51:38 | ticketvision.data_loader | INFO     |   Data Sync Issue                :  19877  ( 9.94%)
+2026-07-03 22:51:38 | ticketvision.data_loader | INFO     |   Account Suspension             :  19864  ( 9.93%)
+2026-07-03 22:56:01 | ticketvision.data_loader | INFO     | Loading dataset from: D:\MLPs\TicketVision AI\data\raw\customer_support_tickets_200k.csv
+2026-07-03 22:56:02 | ticketvision.data_loader | INFO     | Dataset loaded successfully.
+2026-07-03 22:56:02 | ticketvision.data_loader | INFO     | Column validation passed — all required columns present.
+2026-07-03 22:56:02 | ticketvision.data_loader | INFO     | Dataset shape    : 200,000 rows x 3 columns.
+2026-07-03 22:56:02 | ticketvision.data_loader | INFO     | Data types:
+2026-07-03 22:56:02 | ticketvision.data_loader | INFO     |   product                   : object
+2026-07-03 22:56:02 | ticketvision.data_loader | INFO     |   category                  : object
+2026-07-03 22:56:02 | ticketvision.data_loader | INFO     |   issue_description         : object
+2026-07-03 22:56:02 | ticketvision.data_loader | INFO     | Missing values   : None detected.
+2026-07-03 22:56:02 | ticketvision.data_loader | WARNING  | Duplicate rows   : 199000 (99.50% of dataset).
+2026-07-03 22:56:02 | ticketvision.data_loader | INFO     | Class distribution (10 unique categories):
+2026-07-03 22:56:02 | ticketvision.data_loader | INFO     |   Feature Request                :  20169  (10.08%)
+2026-07-03 22:56:02 | ticketvision.data_loader | INFO     |   Subscription Cancellation      :  20096  (10.05%)
+2026-07-03 22:56:02 | ticketvision.data_loader | INFO     |   Performance Issue              :  20074  (10.04%)
+2026-07-03 22:56:02 | ticketvision.data_loader | INFO     |   Security Concern               :  20040  (10.02%)
+2026-07-03 22:56:02 | ticketvision.data_loader | INFO     |   Login Issue                    :  20002  (10.00%)
+2026-07-03 22:56:02 | ticketvision.data_loader | INFO     |   Payment Problem                :  19997  (10.00%)
+2026-07-03 22:56:02 | ticketvision.data_loader | INFO     |   Bug Report                     :  19981  ( 9.99%)
+2026-07-03 22:56:02 | ticketvision.data_loader | INFO     |   Refund Request                 :  19900  ( 9.95%)
+2026-07-03 22:56:02 | ticketvision.data_loader | INFO     |   Data Sync Issue                :  19877  ( 9.94%)
+2026-07-03 22:56:02 | ticketvision.data_loader | INFO     |   Account Suspension             :  19864  ( 9.93%)
+2026-07-03 22:56:18 | ticketvision.data_loader | INFO     | Loading dataset from: D:\MLPs\TicketVision AI\data\raw\customer_support_tickets_200k.csv
+2026-07-03 22:56:18 | ticketvision.data_loader | INFO     | Dataset loaded successfully.
+2026-07-03 22:56:18 | ticketvision.data_loader | INFO     | Column validation passed — all required columns present.
+2026-07-03 22:56:18 | ticketvision.data_loader | INFO     | Dataset shape    : 200,000 rows x 3 columns.
+2026-07-03 22:56:18 | ticketvision.data_loader | INFO     | Data types:
+2026-07-03 22:56:18 | ticketvision.data_loader | INFO     |   product                   : object
+2026-07-03 22:56:18 | ticketvision.data_loader | INFO     |   category                  : object
+2026-07-03 22:56:18 | ticketvision.data_loader | INFO     |   issue_description         : object
+2026-07-03 22:56:18 | ticketvision.data_loader | INFO     | Missing values   : None detected.
+2026-07-03 22:56:18 | ticketvision.data_loader | WARNING  | Duplicate rows   : 199000 (99.50% of dataset).
+2026-07-03 22:56:18 | ticketvision.data_loader | INFO     | Class distribution (10 unique categories):
+2026-07-03 22:56:18 | ticketvision.data_loader | INFO     |   Feature Request                :  20169  (10.08%)
+2026-07-03 22:56:18 | ticketvision.data_loader | INFO     |   Subscription Cancellation      :  20096  (10.05%)
+2026-07-03 22:56:18 | ticketvision.data_loader | INFO     |   Performance Issue              :  20074  (10.04%)
+2026-07-03 22:56:18 | ticketvision.data_loader | INFO     |   Security Concern               :  20040  (10.02%)
+2026-07-03 22:56:18 | ticketvision.data_loader | INFO     |   Login Issue                    :  20002  (10.00%)
+2026-07-03 22:56:18 | ticketvision.data_loader | INFO     |   Payment Problem                :  19997  (10.00%)
+2026-07-03 22:56:18 | ticketvision.data_loader | INFO     |   Bug Report                     :  19981  ( 9.99%)
+2026-07-03 22:56:18 | ticketvision.data_loader | INFO     |   Refund Request                 :  19900  ( 9.95%)
+2026-07-03 22:56:18 | ticketvision.data_loader | INFO     |   Data Sync Issue                :  19877  ( 9.94%)
+2026-07-03 22:56:18 | ticketvision.data_loader | INFO     |   Account Suspension             :  19864  ( 9.93%)
+2026-07-03 23:03:18 | ticketvision.preprocessing | INFO     | No DataFrame supplied — loading from raw dataset.
+2026-07-03 23:03:18 | ticketvision.data_loader | INFO     | Loading dataset from: D:\MLPs\TicketVision AI\data\raw\customer_support_tickets_200k.csv
+2026-07-03 23:03:18 | ticketvision.data_loader | INFO     | Dataset loaded successfully.
+2026-07-03 23:03:18 | ticketvision.data_loader | INFO     | Column validation passed — all required columns present.
+2026-07-03 23:03:18 | ticketvision.data_loader | INFO     | Dataset shape    : 200,000 rows x 3 columns.
+2026-07-03 23:03:18 | ticketvision.data_loader | INFO     | Data types:
+2026-07-03 23:03:18 | ticketvision.data_loader | INFO     |   product                   : object
+2026-07-03 23:03:18 | ticketvision.data_loader | INFO     |   category                  : object
+2026-07-03 23:03:18 | ticketvision.data_loader | INFO     |   issue_description         : object
+2026-07-03 23:03:19 | ticketvision.data_loader | INFO     | Missing values   : None detected.
+2026-07-03 23:03:19 | ticketvision.data_loader | WARNING  | Duplicate rows   : 199000 (99.50% of dataset).
+2026-07-03 23:03:19 | ticketvision.data_loader | INFO     | Class distribution (10 unique categories):
+2026-07-03 23:03:19 | ticketvision.data_loader | INFO     |   Feature Request                :  20169  (10.08%)
+2026-07-03 23:03:19 | ticketvision.data_loader | INFO     |   Subscription Cancellation      :  20096  (10.05%)
+2026-07-03 23:03:19 | ticketvision.data_loader | INFO     |   Performance Issue              :  20074  (10.04%)
+2026-07-03 23:03:19 | ticketvision.data_loader | INFO     |   Security Concern               :  20040  (10.02%)
+2026-07-03 23:03:19 | ticketvision.data_loader | INFO     |   Login Issue                    :  20002  (10.00%)
+2026-07-03 23:03:19 | ticketvision.data_loader | INFO     |   Payment Problem                :  19997  (10.00%)
+2026-07-03 23:03:19 | ticketvision.data_loader | INFO     |   Bug Report                     :  19981  ( 9.99%)
+2026-07-03 23:03:19 | ticketvision.data_loader | INFO     |   Refund Request                 :  19900  ( 9.95%)
+2026-07-03 23:03:19 | ticketvision.data_loader | INFO     |   Data Sync Issue                :  19877  ( 9.94%)
+2026-07-03 23:03:19 | ticketvision.data_loader | INFO     |   Account Suspension             :  19864  ( 9.93%)
+2026-07-03 23:03:19 | ticketvision.preprocessing | INFO     | Starting preprocessing on 200,000 rows.
+2026-07-03 23:03:19 | ticketvision.preprocessing | INFO     | Merged 'product' + 'issue_description' into 'text' column.
+2026-07-03 23:03:19 | ticketvision.preprocessing | INFO     | Cleaning text (stopwords=True, lemmatize=True) — this may take a moment...
+2026-07-03 23:03:38 | ticketvision.preprocessing | INFO     | Text cleaning complete — 200,000 rows remain.
+2026-07-03 23:03:38 | ticketvision.preprocessing | INFO     | Label encoding complete — 10 classes.
+2026-07-03 23:03:38 | ticketvision.preprocessing | INFO     |    0 : Account Suspension
+2026-07-03 23:03:38 | ticketvision.preprocessing | INFO     |    1 : Bug Report
+2026-07-03 23:03:38 | ticketvision.preprocessing | INFO     |    2 : Data Sync Issue
+2026-07-03 23:03:38 | ticketvision.preprocessing | INFO     |    3 : Feature Request
+2026-07-03 23:03:38 | ticketvision.preprocessing | INFO     |    4 : Login Issue
+2026-07-03 23:03:38 | ticketvision.preprocessing | INFO     |    5 : Payment Problem
+2026-07-03 23:03:38 | ticketvision.preprocessing | INFO     |    6 : Performance Issue
+2026-07-03 23:03:38 | ticketvision.preprocessing | INFO     |    7 : Refund Request
+2026-07-03 23:03:38 | ticketvision.preprocessing | INFO     |    8 : Security Concern
+2026-07-03 23:03:38 | ticketvision.preprocessing | INFO     |    9 : Subscription Cancellation
+2026-07-03 23:03:38 | ticketvision.preprocessing | INFO     | Label encoder saved to: D:\MLPs\TicketVision AI\data\processed\label_encoder.json
+2026-07-03 23:03:40 | ticketvision.preprocessing | INFO     | Processed dataset saved to: D:\MLPs\TicketVision AI\data\processed\processed_tickets.csv
+2026-07-03 23:10:05 | ticketvision.preprocessing | INFO     | No DataFrame supplied — loading from raw dataset.
+2026-07-03 23:10:05 | ticketvision.data_loader | INFO     | Loading dataset from: D:\MLPs\TicketVision AI\data\raw\customer_support_tickets_200k.csv
+2026-07-03 23:10:06 | ticketvision.data_loader | INFO     | Dataset loaded successfully.
+2026-07-03 23:10:06 | ticketvision.data_loader | INFO     | Column validation passed — all required columns present.
+2026-07-03 23:10:06 | ticketvision.data_loader | INFO     | Dataset shape    : 200,000 rows x 3 columns.
+2026-07-03 23:10:06 | ticketvision.data_loader | INFO     | Data types:
+2026-07-03 23:10:06 | ticketvision.data_loader | INFO     |   product                   : object
+2026-07-03 23:10:06 | ticketvision.data_loader | INFO     |   category                  : object
+2026-07-03 23:10:06 | ticketvision.data_loader | INFO     |   issue_description         : object
+2026-07-03 23:10:06 | ticketvision.data_loader | INFO     | Missing values   : None detected.
+2026-07-03 23:10:06 | ticketvision.data_loader | WARNING  | Duplicate rows   : 199000 (99.50% of dataset).
+2026-07-03 23:10:06 | ticketvision.data_loader | INFO     | Class distribution (10 unique categories):
+2026-07-03 23:10:06 | ticketvision.data_loader | INFO     |   Feature Request                :  20169  (10.08%)
+2026-07-03 23:10:06 | ticketvision.data_loader | INFO     |   Subscription Cancellation      :  20096  (10.05%)
+2026-07-03 23:10:06 | ticketvision.data_loader | INFO     |   Performance Issue              :  20074  (10.04%)
+2026-07-03 23:10:06 | ticketvision.data_loader | INFO     |   Security Concern               :  20040  (10.02%)
+2026-07-03 23:10:06 | ticketvision.data_loader | INFO     |   Login Issue                    :  20002  (10.00%)
+2026-07-03 23:10:06 | ticketvision.data_loader | INFO     |   Payment Problem                :  19997  (10.00%)
+2026-07-03 23:10:06 | ticketvision.data_loader | INFO     |   Bug Report                     :  19981  ( 9.99%)
+2026-07-03 23:10:06 | ticketvision.data_loader | INFO     |   Refund Request                 :  19900  ( 9.95%)
+2026-07-03 23:10:06 | ticketvision.data_loader | INFO     |   Data Sync Issue                :  19877  ( 9.94%)
+2026-07-03 23:10:06 | ticketvision.data_loader | INFO     |   Account Suspension             :  19864  ( 9.93%)
+2026-07-03 23:10:06 | ticketvision.preprocessing | INFO     | Starting preprocessing on 200,000 rows.
+2026-07-03 23:10:06 | ticketvision.preprocessing | INFO     | Merged 'product' + 'issue_description' into 'text' column.
+2026-07-03 23:10:06 | ticketvision.preprocessing | INFO     | Cleaning text (stopwords=True, lemmatize=True) — this may take a moment...
+2026-07-03 23:10:22 | ticketvision.preprocessing | INFO     | Text cleaning complete — 200,000 rows remain.
+2026-07-03 23:10:22 | ticketvision.preprocessing | INFO     | Label encoding complete — 10 classes.
+2026-07-03 23:10:22 | ticketvision.preprocessing | INFO     |    0 : Account Suspension
+2026-07-03 23:10:22 | ticketvision.preprocessing | INFO     |    1 : Bug Report
+2026-07-03 23:10:22 | ticketvision.preprocessing | INFO     |    2 : Data Sync Issue
+2026-07-03 23:10:22 | ticketvision.preprocessing | INFO     |    3 : Feature Request
+2026-07-03 23:10:22 | ticketvision.preprocessing | INFO     |    4 : Login Issue
+2026-07-03 23:10:22 | ticketvision.preprocessing | INFO     |    5 : Payment Problem
+2026-07-03 23:10:22 | ticketvision.preprocessing | INFO     |    6 : Performance Issue
+2026-07-03 23:10:22 | ticketvision.preprocessing | INFO     |    7 : Refund Request
+2026-07-03 23:10:22 | ticketvision.preprocessing | INFO     |    8 : Security Concern
+2026-07-03 23:10:22 | ticketvision.preprocessing | INFO     |    9 : Subscription Cancellation
+2026-07-03 23:10:22 | ticketvision.preprocessing | INFO     | Label encoder saved to: D:\MLPs\TicketVision AI\data\processed\label_encoder.json
+2026-07-03 23:10:23 | ticketvision.preprocessing | INFO     | Processed dataset saved to: D:\MLPs\TicketVision AI\data\processed\processed_tickets.csv
