@@ -140,6 +140,7 @@ COL_TEXT: Final[str]              = "text"
 # 4. NLP CONFIGURATION
 # ============================================================================
 
+NUM_CLASSES: Final[int]      = 10        # Number of target ticket categories.
 VOCAB_SIZE: Final[int]       = 20_000    # Maximum vocabulary size for tokeniser.
 MAX_SEQUENCE_LENGTH: Final[int] = 150    # Pad / truncate every sequence to this length.
 EMBEDDING_DIM: Final[int]    = 128       # Dimensionality of word embeddings.
