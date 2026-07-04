@@ -27,7 +27,7 @@ Created: 2026-07-03
 from __future__ import annotations
 
 import logging
-import sys
+import sys,os
 from pathlib import Path
 from typing import Dict, Final, List
 
@@ -104,10 +104,16 @@ _ALL_DIRECTORIES: Final[List[Path]] = [
 # 2. DATASET PATHS
 # ============================================================================
 
-# Raw dataset (shipped with the repo).
-RAW_DATASET_PATH: Final[Path] = (
-    RAW_DATA_DIR / "customer_support_tickets_200k.csv"
+PROJECT_ROOT = Path(__file__).resolve().parent
+
+RAW_DATA_DIR = PROJECT_ROOT / "data" / "raw"
+
+DATASET_PATH = os.getenv(
+    "DATASET_PATH",
+    str(RAW_DATA_DIR / "customer_support_tickets_200k.csv")
 )
+
+RAW_DATASET_PATH = Path(DATASET_PATH)
 
 # Processed artefacts produced by the preprocessing pipeline.
 # Train / validation / test splits all reside under data/processed/.
