@@ -1,0 +1,69 @@
+2026-07-07 22:02:26,457 - __main__ - INFO - Starting standalone data loader verification...
+2026-07-07 22:02:26,458 - __main__ - INFO - Initializing loading of both train and test datasets.
+2026-07-07 22:02:26,458 - __main__ - INFO - Loading training dataset from: D:\MLPs\AG-News-Classification\data\raw\train.csv
+2026-07-07 22:02:26,458 - __main__ - INFO - File validated successfully: D:\MLPs\AG-News-Classification\data\raw\train.csv
+2026-07-07 22:02:26,988 - __main__ - INFO - Renamed columns for standardization: {'Class Index': 'class', 'Description': 'description'}
+2026-07-07 22:02:26,991 - __main__ - INFO - All required columns validated: ['description', 'class']
+2026-07-07 22:02:27,004 - __main__ - INFO - Column 'description' has no missing values.
+2026-07-07 22:02:27,006 - __main__ - INFO - Column 'class' has no missing values.
+2026-07-07 22:02:27,164 - __main__ - INFO - No duplicate rows found in the dataset.
+2026-07-07 22:02:27,169 - __main__ - INFO - Unique classes found: [np.int64(3), np.int64(4), np.int64(2), np.int64(1)] (Count: 4)
+2026-07-07 22:02:27,169 - __main__ - INFO - Class distribution validation passed successfully.
+2026-07-07 22:02:27,344 - __main__ - INFO - 
+============================================================
+DATASET SUMMARY: TRAINING DATASET
+============================================================
+Shape: 120000 rows, 3 columns
+------------------------------------------------------------
+Columns & Types:
+  - class: int64
+  - Title: object
+  - description: object
+------------------------------------------------------------
+Missing Values:
+  - class: 0
+  - Title: 0
+  - description: 0
+------------------------------------------------------------
+Duplicate Rows: 0
+------------------------------------------------------------
+Class Distribution:
+  - Class 3 (Business): 30000 rows (25.00%)
+  - Class 4 (Sci/Tech): 30000 rows (25.00%)
+  - Class 2 (Sports): 30000 rows (25.00%)
+  - Class 1 (World): 30000 rows (25.00%)
+============================================================
+2026-07-07 22:02:27,345 - __main__ - INFO - Loading testing dataset from: D:\MLPs\AG-News-Classification\data\raw\test.csv
+2026-07-07 22:02:27,345 - __main__ - INFO - File validated successfully: D:\MLPs\AG-News-Classification\data\raw\test.csv
+2026-07-07 22:02:27,371 - __main__ - INFO - Renamed columns for standardization: {'Class Index': 'class', 'Description': 'description'}
+2026-07-07 22:02:27,384 - __main__ - INFO - All required columns validated: ['description', 'class']
+2026-07-07 22:02:27,386 - __main__ - INFO - Column 'description' has no missing values.
+2026-07-07 22:02:27,386 - __main__ - INFO - Column 'class' has no missing values.
+2026-07-07 22:02:27,394 - __main__ - INFO - No duplicate rows found in the dataset.
+2026-07-07 22:02:27,394 - __main__ - INFO - Unique classes found: [np.int64(3), np.int64(4), np.int64(2), np.int64(1)] (Count: 4)
+2026-07-07 22:02:27,394 - __main__ - INFO - Class distribution validation passed successfully.
+2026-07-07 22:02:27,406 - __main__ - INFO - 
+============================================================
+DATASET SUMMARY: TESTING DATASET
+============================================================
+Shape: 7600 rows, 3 columns
+------------------------------------------------------------
+Columns & Types:
+  - class: int64
+  - Title: object
+  - description: object
+------------------------------------------------------------
+Missing Values:
+  - class: 0
+  - Title: 0
+  - description: 0
+------------------------------------------------------------
+Duplicate Rows: 0
+------------------------------------------------------------
+Class Distribution:
+  - Class 3 (Business): 1900 rows (25.00%)
+  - Class 4 (Sci/Tech): 1900 rows (25.00%)
+  - Class 2 (Sports): 1900 rows (25.00%)
+  - Class 1 (World): 1900 rows (25.00%)
+============================================================
+2026-07-07 22:02:27,409 - __main__ - INFO - Both training and testing datasets loaded successfully.

@@ -1,0 +1,9 @@
+2026-07-07 22:17:02,371 - __main__ - INFO - Starting standalone tokenizer verification...
+2026-07-07 22:17:02,374 - __main__ - INFO - Creating Keras Tokenizer with vocab_size=100, oov_token='<OOV>'
+2026-07-07 22:17:02,374 - __main__ - INFO - Fitting tokenizer on 3 text sequences...
+2026-07-07 22:17:02,374 - __main__ - INFO - Tokenizer fitting complete. Calculated vocab size: 23
+2026-07-07 22:17:02,375 - __main__ - INFO - Saving tokenizer to: D:\MLPs\AG-News-Classification\src\data\test_output\test_tokenizer.pkl
+2026-07-07 22:17:02,376 - src.utils.file_io - INFO - Pickle file saved successfully at: D:\MLPs\AG-News-Classification\src\data\test_output\test_tokenizer.pkl
+2026-07-07 22:17:02,376 - __main__ - INFO - Loading tokenizer from: D:\MLPs\AG-News-Classification\src\data\test_output\test_tokenizer.pkl
+2026-07-07 22:17:02,377 - src.utils.file_io - INFO - Pickle file loaded successfully from: D:\MLPs\AG-News-Classification\src\data\test_output\test_tokenizer.pkl
+2026-07-07 22:17:02,377 - __main__ - INFO - Converting 1 texts to sequences...
