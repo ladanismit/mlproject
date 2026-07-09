@@ -55,9 +55,9 @@ CLASS_LABELS: Final[Dict[int, str]] = {
 # ==============================================================================
 # TEXT PREPROCESSING
 # ==============================================================================
-VOCAB_SIZE: Final[int] = 20000
-MAX_SEQUENCE_LENGTH: Final[int] = 120
-EMBEDDING_DIM: Final[int] = 100
+VOCAB_SIZE: Final[int] = 15000
+MAX_SEQUENCE_LENGTH: Final[int] = 80
+EMBEDDING_DIM: Final[int] = 64
 OOV_TOKEN: Final[str] = "<OOV>"
 PADDING_TYPE: Final[str] = "post"      # "pre" or "post"
 TRUNCATING_TYPE: Final[str] = "post"   # "pre" or "post"
@@ -65,7 +65,7 @@ TRUNCATING_TYPE: Final[str] = "post"   # "pre" or "post"
 # ==============================================================================
 # TRAINING CONFIGURATION
 # ==============================================================================
-BATCH_SIZE: Final[int] = 64
+BATCH_SIZE: Final[int] = 128
 EPOCHS: Final[int] = 10
 LEARNING_RATE: Final[float] = 1e-3
 VALIDATION_SPLIT: Final[float] = 0.2
