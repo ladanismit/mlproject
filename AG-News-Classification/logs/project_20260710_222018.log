@@ -1,0 +1,6 @@
+2026-07-10 22:20:18,048 - AttentionModel - INFO - Initialized AttentionModel instance.
+2026-07-10 22:20:18,053 - AttentionModel - INFO - Building BiLSTM + Self-Attention model architecture...
+2026-07-10 22:20:18,254 - AttentionModel - INFO - BiLSTM + Self-Attention model architecture built successfully.
+2026-07-10 22:20:18,284 - AttentionModel - INFO - Compiling BiLSTM + Self-Attention model (optimizer=adam, loss=sparse_categorical_crossentropy, metrics=['accuracy'])
+2026-07-10 22:20:18,300 - AttentionModel - INFO - BiLSTM + Self-Attention model compiled successfully.
+2026-07-10 22:20:18,301 - AttentionModel - INFO - Generated 2 callbacks for BiLSTM + Self-Attention training.

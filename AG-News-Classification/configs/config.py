@@ -93,7 +93,7 @@ LSTM_DROPOUT: Final[float] = 0.2
 LSTM_RECURRENT_DROPOUT: Final[float] = 0.2
 
 # --- BiLSTM + Self-Attention Configuration ---
-BILSTM_UNITS: Final[int] = 128
+BILSTM_UNITS: Final[int] = 64
 ATTENTION_HEADS: Final[int] = 4
 ATTENTION_KEY_DIM: Final[int] = 64
 ATTENTION_DROPOUT: Final[float] = 0.1
