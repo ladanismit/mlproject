@@ -1,0 +1,146 @@
+2026-07-11 14:38:59,672 - training_orchestrator - INFO - ============================================================
+2026-07-11 14:38:59,672 - training_orchestrator - INFO - STARTING MODEL TRAINING PIPELINE - MODEL: BERT
+2026-07-11 14:38:59,672 - training_orchestrator - INFO - ============================================================
+2026-07-11 14:38:59,672 - training_orchestrator - INFO - CLI Parameters: {'model': 'bert', 'epochs': 1, 'batch_size': 16, 'learning_rate': 0.001, 'patience': 3, 'min_delta': 0.0001, 'seed': 42}
+2026-07-11 14:38:59,672 - src.utils.seed - INFO - Configuring environment with reproducibility seed: 42
+2026-07-11 14:38:59,687 - src.utils.seed - INFO - Enforced TensorFlow operation determinism.
+2026-07-11 14:38:59,688 - src.utils.seed - INFO - Reproducibility settings successfully configured.
+2026-07-11 14:38:59,688 - training_orchestrator - INFO - Loading training and testing CSV datasets...
+2026-07-11 14:38:59,688 - src.data.data_loader - INFO - Initializing loading of both train and test datasets.
+2026-07-11 14:38:59,688 - src.data.data_loader - INFO - Loading training dataset from: D:\MLPs\AG-News-Classification\data\raw\train.csv
+2026-07-11 14:38:59,688 - src.data.data_loader - INFO - File validated successfully: D:\MLPs\AG-News-Classification\data\raw\train.csv
+2026-07-11 14:39:01,133 - src.data.data_loader - INFO - Renamed columns for standardization: {'Class Index': 'class', 'Description': 'description'}
+2026-07-11 14:39:01,133 - src.data.data_loader - INFO - All required columns validated: ['description', 'class']
+2026-07-11 14:39:01,180 - src.data.data_loader - INFO - Column 'description' has no missing values.
+2026-07-11 14:39:01,180 - src.data.data_loader - INFO - Column 'class' has no missing values.
+2026-07-11 14:39:01,547 - src.data.data_loader - INFO - No duplicate rows found in the dataset.
+2026-07-11 14:39:01,547 - src.data.data_loader - INFO - Unique classes found: [np.int64(3), np.int64(4), np.int64(2), np.int64(1)] (Count: 4)
+2026-07-11 14:39:01,547 - src.data.data_loader - INFO - Class distribution validation passed successfully.
+2026-07-11 14:39:02,007 - src.data.data_loader - INFO - 
+============================================================
+DATASET SUMMARY: TRAINING DATASET
+============================================================
+Shape: 120000 rows, 3 columns
+------------------------------------------------------------
+Columns & Types:
+  - class: int64
+  - Title: object
+  - description: object
+------------------------------------------------------------
+Missing Values:
+  - class: 0
+  - Title: 0
+  - description: 0
+------------------------------------------------------------
+Duplicate Rows: 0
+------------------------------------------------------------
+Class Distribution:
+  - Class 3 (Business): 30000 rows (25.00%)
+  - Class 4 (Sci/Tech): 30000 rows (25.00%)
+  - Class 2 (Sports): 30000 rows (25.00%)
+  - Class 1 (World): 30000 rows (25.00%)
+============================================================
+2026-07-11 14:39:02,007 - src.data.data_loader - INFO - Loading testing dataset from: D:\MLPs\AG-News-Classification\data\raw\test.csv
+2026-07-11 14:39:02,007 - src.data.data_loader - INFO - File validated successfully: D:\MLPs\AG-News-Classification\data\raw\test.csv
+2026-07-11 14:39:02,080 - src.data.data_loader - INFO - Renamed columns for standardization: {'Class Index': 'class', 'Description': 'description'}
+2026-07-11 14:39:02,080 - src.data.data_loader - INFO - All required columns validated: ['description', 'class']
+2026-07-11 14:39:02,098 - src.data.data_loader - INFO - Column 'description' has no missing values.
+2026-07-11 14:39:02,099 - src.data.data_loader - INFO - Column 'class' has no missing values.
+2026-07-11 14:39:02,138 - src.data.data_loader - INFO - No duplicate rows found in the dataset.
+2026-07-11 14:39:02,142 - src.data.data_loader - INFO - Unique classes found: [np.int64(3), np.int64(4), np.int64(2), np.int64(1)] (Count: 4)
+2026-07-11 14:39:02,142 - src.data.data_loader - INFO - Class distribution validation passed successfully.
+2026-07-11 14:39:02,146 - src.data.data_loader - INFO - 
+============================================================
+DATASET SUMMARY: TESTING DATASET
+============================================================
+Shape: 7600 rows, 3 columns
+------------------------------------------------------------
+Columns & Types:
+  - class: int64
+  - Title: object
+  - description: object
+------------------------------------------------------------
+Missing Values:
+  - class: 0
+  - Title: 0
+  - description: 0
+------------------------------------------------------------
+Duplicate Rows: 0
+------------------------------------------------------------
+Class Distribution:
+  - Class 3 (Business): 1900 rows (25.00%)
+  - Class 4 (Sci/Tech): 1900 rows (25.00%)
+  - Class 2 (Sports): 1900 rows (25.00%)
+  - Class 1 (World): 1900 rows (25.00%)
+============================================================
+2026-07-11 14:39:02,146 - src.data.data_loader - INFO - Both training and testing datasets loaded successfully.
+2026-07-11 14:39:02,146 - training_orchestrator - INFO - Loaded datasets. Train shape: (120000, 3), Test shape: (7600, 3)
+2026-07-11 14:39:02,146 - training_orchestrator - INFO - Executing text cleaning and preprocessing...
+2026-07-11 14:39:02,146 - src.data.preprocessing - INFO - Preprocessing text column 'description' in DataFrame...
+2026-07-11 14:39:11,383 - src.data.preprocessing - INFO - Preprocessing completed. Saved results to 'description'.
+2026-07-11 14:39:11,388 - src.data.preprocessing - INFO - Preprocessing text column 'description' in DataFrame...
+2026-07-11 14:39:11,937 - src.data.preprocessing - INFO - Preprocessing completed. Saved results to 'description'.
+2026-07-11 14:39:11,937 - training_orchestrator - INFO - Initializing BERT tokenizer...
+2026-07-11 14:39:33,882 - src.data.bert_tokenizer - INFO - Loading pretrained tokenizer for model: bert-base-uncased
+2026-07-11 14:39:36,556 - src.data.bert_tokenizer - INFO - Pretrained tokenizer loaded successfully.
+2026-07-11 14:39:36,556 - src.data.bert_tokenizer - INFO - Saving tokenizer artifact to: D:\MLPs\AG-News-Classification\saved_models\bert_tokenizer.pkl
+2026-07-11 14:39:36,572 - src.utils.file_io - INFO - Pickle file saved successfully at: D:\MLPs\AG-News-Classification\saved_models\bert_tokenizer.pkl
+2026-07-11 14:39:36,572 - training_orchestrator - INFO - BERT tokenizer saved successfully to: D:\MLPs\AG-News-Classification\saved_models\bert_tokenizer.pkl
+2026-07-11 14:39:36,605 - src.data.bert_tokenizer - INFO - Tokenizing 120000 text sequences...
+2026-07-11 14:40:45,274 - src.data.bert_tokenizer - INFO - Text sequence tokenization completed.
+2026-07-11 14:40:53,720 - src.data.bert_tokenizer - INFO - Tokenizing 7600 text sequences...
+2026-07-11 14:40:58,649 - src.data.bert_tokenizer - INFO - Text sequence tokenization completed.
+2026-07-11 14:40:58,953 - training_orchestrator - INFO - Initializing label encoding...
+2026-07-11 14:40:58,959 - src.data.label_encoder - INFO - Fitted CustomLabelEncoder on 4 unique classes: [1, 2, 3, 4]
+2026-07-11 14:40:58,960 - src.data.label_encoder - INFO - Saving label encoder to: D:\MLPs\AG-News-Classification\saved_models\bert_label_encoder.pkl
+2026-07-11 14:40:58,961 - src.utils.file_io - INFO - Pickle file saved successfully at: D:\MLPs\AG-News-Classification\saved_models\bert_label_encoder.pkl
+2026-07-11 14:40:58,962 - training_orchestrator - INFO - Label encoder saved successfully to: D:\MLPs\AG-News-Classification\saved_models\bert_label_encoder.pkl
+2026-07-11 14:40:58,963 - src.data.label_encoder - INFO - Encoding 120000 labels...
+2026-07-11 14:40:59,099 - src.data.label_encoder - INFO - Encoding 7600 labels...
+2026-07-11 14:40:59,104 - training_orchestrator - INFO - Creating optimized tf.data.Dataset pipelines...
+2026-07-11 14:40:59,106 - src.data.bert_dataset - INFO - Initializing BERT datasets creation pipeline...
+2026-07-11 14:40:59,107 - src.data.bert_dataset - INFO - Splitting BERT arrays with validation_split=0.2 and random_seed=42
+2026-07-11 14:40:59,532 - src.data.bert_dataset - INFO - Split complete. Training: 96000 samples, Validation: 24000 samples.
+2026-07-11 14:40:59,532 - src.data.bert_dataset - INFO - Creating tf.data.Dataset. Input shapes - input_ids: (96000, 128), attention_masks: (96000, 128), token_type_ids: (96000, 128)
+2026-07-11 14:40:59,532 - src.data.bert_dataset - INFO - Adding target labels with shape: (96000,)
+2026-07-11 14:40:59,855 - src.data.bert_dataset - INFO - Creating tf.data.Dataset. Input shapes - input_ids: (24000, 128), attention_masks: (24000, 128), token_type_ids: (24000, 128)
+2026-07-11 14:40:59,855 - src.data.bert_dataset - INFO - Adding target labels with shape: (24000,)
+2026-07-11 14:40:59,967 - src.data.bert_dataset - INFO - Creating tf.data.Dataset. Input shapes - input_ids: (7600, 128), attention_masks: (7600, 128), token_type_ids: (7600, 128)
+2026-07-11 14:40:59,967 - src.data.bert_dataset - INFO - Adding target labels with shape: (7600,)
+2026-07-11 14:40:59,982 - src.data.bert_dataset - INFO - Optimizing training dataset (shuffled, batched, prefetched)...
+2026-07-11 14:41:00,142 - src.data.bert_dataset - INFO - Optimizing validation dataset (batched, prefetched)...
+2026-07-11 14:41:00,202 - src.data.bert_dataset - INFO - Optimizing testing dataset (batched, prefetched)...
+2026-07-11 14:41:00,215 - src.data.bert_dataset - INFO - BERT model datasets successfully created and optimized.
+2026-07-11 14:41:00,286 - training_orchestrator - INFO - Loading class configuration for model type: 'bert'
+2026-07-11 14:41:00,545 - training_orchestrator - INFO - Instantiating model class: BERTModel
+2026-07-11 14:41:00,545 - BERTModel - INFO - Initialized BERTModel instance.
+2026-07-11 14:41:00,545 - training_orchestrator - INFO - Building model layers...
+2026-07-11 14:41:00,545 - BERTModel - INFO - Building BERT model architecture (model_name=bert-base-uncased)...
+2026-07-11 14:41:01,345 - tensorflow - WARNING - From C:\Users\admin\AppData\Local\Programs\Python\Python312\Lib\site-packages\tf_keras\src\backend.py:873: The name tf.get_default_graph is deprecated. Please use tf.compat.v1.get_default_graph instead.
+
+2026-07-11 14:41:09,133 - BERTModel - INFO - Configured top 2 encoder layers of BERT as trainable. Rest of the layers are frozen.
+2026-07-11 14:41:23,763 - BERTModel - INFO - BERT model architecture built successfully.
+2026-07-11 14:41:23,763 - training_orchestrator - INFO - Compiling model with learning_rate=0.001...
+2026-07-11 14:41:23,764 - tensorflow - WARNING - TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+2026-07-11 14:41:23,785 - BERTModel - INFO - Compiling BERT model (optimizer=<tf_keras.src.optimizers.adam.Adam object at 0x000002DC01C40E90>, loss=sparse_categorical_crossentropy, metrics=['accuracy'])
+2026-07-11 14:41:23,810 - BERTModel - INFO - BERT model compiled successfully.
+2026-07-11 14:41:23,919 - training_orchestrator - INFO - Generating training callbacks (EarlyStopping, Checkpoint)...
+2026-07-11 14:41:23,920 - BERTModel - INFO - Generated 2 callbacks for BERT training.
+2026-07-11 14:41:23,920 - training_orchestrator - INFO - Beginning model fitting and training process...
+2026-07-11 14:41:24,267 - training_orchestrator - ERROR - Error encountered during model training: in user code:
+
+    File "C:\Users\admin\AppData\Local\Programs\Python\Python312\Lib\site-packages\tf_keras\src\engine\training.py", line 1398, in train_function  *
+        return step_function(self, iterator)
+    File "C:\Users\admin\AppData\Local\Programs\Python\Python312\Lib\site-packages\tf_keras\src\engine\training.py", line 1381, in step_function  **
+        outputs = model.distribute_strategy.run(run_step, args=(data,))
+    File "C:\Users\admin\AppData\Local\Programs\Python\Python312\Lib\site-packages\tf_keras\src\engine\training.py", line 1370, in run_step  **
+        outputs = model.train_step(data)
+    File "C:\Users\admin\AppData\Local\Programs\Python\Python312\Lib\site-packages\tf_keras\src\engine\training.py", line 1147, in train_step
+        y_pred = self(x, training=True)
+    File "C:\Users\admin\AppData\Local\Programs\Python\Python312\Lib\site-packages\tf_keras\src\utils\traceback_utils.py", line 70, in error_handler
+        raise e.with_traceback(filtered_tb) from None
+    File "C:\Users\admin\AppData\Local\Programs\Python\Python312\Lib\site-packages\tf_keras\src\engine\input_spec.py", line 308, in assert_input_compatibility
+        raise ValueError(
+
+    ValueError: Input 0 of layer "BERTModel" is incompatible with the layer: expected shape=(None, 80), found shape=(None, 128)
+

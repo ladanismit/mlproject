@@ -1,0 +1,10 @@
+2026-07-11 11:36:28,150 - __main__ - INFO - Starting standalone tokenizer verification...
+2026-07-11 11:36:28,152 - __main__ - INFO - Loading pretrained tokenizer for model: bert-base-uncased
+2026-07-11 11:36:33,363 - __main__ - INFO - Pretrained tokenizer loaded successfully.
+2026-07-11 11:36:33,364 - __main__ - INFO - Tokenizing 1 text sequences...
+2026-07-11 11:36:33,368 - __main__ - INFO - Text sequence tokenization completed.
+2026-07-11 11:36:33,369 - __main__ - INFO - Saving tokenizer artifact to: D:\MLPs\AG-News-Classification\src\data\test_output\test_bert_tokenizer.pkl
+2026-07-11 11:36:33,376 - src.utils.file_io - INFO - Pickle file saved successfully at: D:\MLPs\AG-News-Classification\src\data\test_output\test_bert_tokenizer.pkl
+2026-07-11 11:36:33,377 - __main__ - INFO - Loading tokenizer artifact from: D:\MLPs\AG-News-Classification\src\data\test_output\test_bert_tokenizer.pkl
+2026-07-11 11:36:33,415 - src.utils.file_io - INFO - Pickle file loaded successfully from: D:\MLPs\AG-News-Classification\src\data\test_output\test_bert_tokenizer.pkl
+2026-07-11 11:36:33,416 - __main__ - INFO - Verification completed successfully.

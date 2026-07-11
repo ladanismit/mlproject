@@ -7,7 +7,18 @@ model building, training, callback orchestration, and saving outputs.
 """
 
 import argparse
+import os
 import sys
+
+# Configure legacy Keras for BERT model compatibility before importing TensorFlow
+if "--model" in sys.argv:
+    try:
+        model_idx = sys.argv.index("--model")
+        if model_idx + 1 < len(sys.argv) and sys.argv[model_idx + 1] == "bert":
+            os.environ["TF_USE_LEGACY_KERAS"] = "1"
+    except ValueError:
+        pass
+
 from pathlib import Path
 from typing import Any
 
@@ -21,6 +32,7 @@ if _project_root not in sys.path:
 
 from configs.config import (
     BATCH_SIZE,
+    BERT_MAX_LENGTH,
     EARLY_STOPPING_MIN_DELTA,
     EARLY_STOPPING_PATIENCE,
     EPOCHS,
@@ -185,24 +197,47 @@ def main() -> None:
         test_df = preprocess_dataframe(test_df, text_column=TEXT_COLUMN)
 
         # 5. Tokenizer Fitting & Sequence Encoding
-        logger.info("Initializing tokenizer training...")
-        tokenizer = create_tokenizer(vocab_size=VOCAB_SIZE, oov_token=OOV_TOKEN)
-        tokenizer = fit_tokenizer_on_text(tokenizer, train_df[TEXT_COLUMN].tolist())
-        
-        # Save Tokenizer
-        tokenizer_path = SAVED_MODELS_DIR / f"{args.model}_tokenizer.pkl"
-        save_tokenizer(tokenizer, tokenizer_path)
-        logger.info(f"Fitted tokenizer saved successfully to: {tokenizer_path}")
+        if args.model == "bert":
+            logger.info("Initializing BERT tokenizer...")
+            from src.data.bert_tokenizer import load_bert_tokenizer, save_tokenizer, tokenize_text_data
+            
+            tokenizer = load_bert_tokenizer()
+            
+            # Save Tokenizer
+            tokenizer_path = SAVED_MODELS_DIR / f"{args.model}_tokenizer.pkl"
+            save_tokenizer(tokenizer, tokenizer_path)
+            logger.info(f"BERT tokenizer saved successfully to: {tokenizer_path}")
 
-        # Encode Texts to Sequences
-        logger.info("Converting text fields to sequences...")
-        train_seqs = convert_texts_to_sequences(tokenizer, train_df[TEXT_COLUMN].tolist())
-        test_seqs = convert_texts_to_sequences(tokenizer, test_df[TEXT_COLUMN].tolist())
+            # Encode and tokenize text data
+            train_tokenized = tokenize_text_data(tokenizer, train_df[TEXT_COLUMN].tolist(), max_length=BERT_MAX_LENGTH)
+            test_tokenized = tokenize_text_data(tokenizer, test_df[TEXT_COLUMN].tolist(), max_length=BERT_MAX_LENGTH)
 
-        # Pad Sequences
-        logger.info(f"Padding text sequences to max length of: {MAX_SEQUENCE_LENGTH}")
-        train_features = pad_text_sequences(train_seqs, maxlen=MAX_SEQUENCE_LENGTH)
-        test_features = pad_text_sequences(test_seqs, maxlen=MAX_SEQUENCE_LENGTH)
+            train_input_ids = train_tokenized["input_ids"]
+            train_attention_masks = train_tokenized["attention_mask"]
+            train_token_type_ids = train_tokenized["token_type_ids"]
+
+            test_input_ids = test_tokenized["input_ids"]
+            test_attention_masks = test_tokenized["attention_mask"]
+            test_token_type_ids = test_tokenized["token_type_ids"]
+        else:
+            logger.info("Initializing tokenizer training...")
+            tokenizer = create_tokenizer(vocab_size=VOCAB_SIZE, oov_token=OOV_TOKEN)
+            tokenizer = fit_tokenizer_on_text(tokenizer, train_df[TEXT_COLUMN].tolist())
+            
+            # Save Tokenizer
+            tokenizer_path = SAVED_MODELS_DIR / f"{args.model}_tokenizer.pkl"
+            save_tokenizer(tokenizer, tokenizer_path)
+            logger.info(f"Fitted tokenizer saved successfully to: {tokenizer_path}")
+
+            # Encode Texts to Sequences
+            logger.info("Converting text fields to sequences...")
+            train_seqs = convert_texts_to_sequences(tokenizer, train_df[TEXT_COLUMN].tolist())
+            test_seqs = convert_texts_to_sequences(tokenizer, test_df[TEXT_COLUMN].tolist())
+
+            # Pad Sequences
+            logger.info(f"Padding text sequences to max length of: {MAX_SEQUENCE_LENGTH}")
+            train_features = pad_text_sequences(train_seqs, maxlen=MAX_SEQUENCE_LENGTH)
+            test_features = pad_text_sequences(test_seqs, maxlen=MAX_SEQUENCE_LENGTH)
 
         # 6. Label Encoding
         logger.info("Initializing label encoding...")
@@ -222,16 +257,33 @@ def main() -> None:
 
         # 7. Create TensorFlow Datasets
         logger.info("Creating optimized tf.data.Dataset pipelines...")
-        train_ds, val_ds, test_ds = create_model_datasets(
-            train_features=train_features,
-            train_labels=train_labels,
-            test_features=test_features,
-            test_labels=test_labels,
-            validation_split=VALIDATION_SPLIT,
-            batch_size=args.batch_size,
-            random_seed=args.seed,
-            cache=True,
-        )
+        if args.model == "bert":
+            from src.data.bert_dataset import create_bert_model_datasets
+            train_ds, val_ds, test_ds = create_bert_model_datasets(
+                train_input_ids=train_input_ids,
+                train_attention_masks=train_attention_masks,
+                train_token_type_ids=train_token_type_ids,
+                train_labels=train_labels,
+                test_input_ids=test_input_ids,
+                test_attention_masks=test_attention_masks,
+                test_token_type_ids=test_token_type_ids,
+                test_labels=test_labels,
+                validation_split=VALIDATION_SPLIT,
+                batch_size=args.batch_size,
+                random_seed=args.seed,
+                cache=True,
+            )
+        else:
+            train_ds, val_ds, test_ds = create_model_datasets(
+                train_features=train_features,
+                train_labels=train_labels,
+                test_features=test_features,
+                test_labels=test_labels,
+                validation_split=VALIDATION_SPLIT,
+                batch_size=args.batch_size,
+                random_seed=args.seed,
+                cache=True,
+            )
 
         # 8. Initialize Model Architecture
         model_class = get_model_class(args.model)
@@ -239,7 +291,10 @@ def main() -> None:
         
         # RNN constructor accepts custom hyperparameters matching config or defaults
         # We dynamically initialize classes inheriting from BaseModel
-        model_instance = model_class()
+        if args.model == "bert":
+            model_instance = model_class(max_length=BERT_MAX_LENGTH)
+        else:
+            model_instance = model_class(max_sequence_length=MAX_SEQUENCE_LENGTH)
         
         logger.info("Building model layers...")
         model_instance.build_model()

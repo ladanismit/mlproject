@@ -65,8 +65,8 @@ TRUNCATING_TYPE: Final[str] = "post"   # "pre" or "post"
 # ==============================================================================
 # TRAINING CONFIGURATION
 # ==============================================================================
-BATCH_SIZE: Final[int] = 128
-EPOCHS: Final[int] = 10
+BATCH_SIZE: Final[int] = 16
+EPOCHS: Final[int] = 3
 LEARNING_RATE: Final[float] = 1e-3
 VALIDATION_SPLIT: Final[float] = 0.2
 
