@@ -1,0 +1,32 @@
+2026-07-13 22:21:03,110 - verify_comparator - INFO - Setting up mock evaluation files and checkpoints...
+2026-07-13 22:21:03,112 - verify_comparator - INFO - Mock metrics saved for rnn: D:\MLPs\AG-News-Classification\saved_models\verify_comparator_temp\rnn_metrics.json
+2026-07-13 22:21:03,235 - absl - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2026-07-13 22:21:03,256 - verify_comparator - INFO - Mock checkpoint saved for rnn: D:\MLPs\AG-News-Classification\saved_models\verify_comparator_temp\rnn_final_model.h5
+2026-07-13 22:21:03,259 - verify_comparator - INFO - Mock metrics saved for lstm: D:\MLPs\AG-News-Classification\saved_models\verify_comparator_temp\lstm_metrics.json
+2026-07-13 22:21:03,290 - absl - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2026-07-13 22:21:03,303 - verify_comparator - INFO - Mock checkpoint saved for lstm: D:\MLPs\AG-News-Classification\saved_models\verify_comparator_temp\lstm_final_model.h5
+2026-07-13 22:21:03,304 - verify_comparator - INFO - Mock metrics saved for attention: D:\MLPs\AG-News-Classification\saved_models\verify_comparator_temp\attention_metrics.json
+2026-07-13 22:21:03,328 - absl - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2026-07-13 22:21:03,339 - verify_comparator - INFO - Mock checkpoint saved for attention: D:\MLPs\AG-News-Classification\saved_models\verify_comparator_temp\attention_final_model.h5
+2026-07-13 22:21:03,340 - verify_comparator - INFO - Mock metrics saved for bert: D:\MLPs\AG-News-Classification\saved_models\verify_comparator_temp\bert_metrics.json
+2026-07-13 22:21:03,361 - absl - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2026-07-13 22:21:03,372 - verify_comparator - INFO - Mock checkpoint saved for bert: D:\MLPs\AG-News-Classification\saved_models\verify_comparator_temp\bert_final_model.h5
+2026-07-13 22:21:03,373 - verify_comparator - INFO - Initializing ModelComparator...
+2026-07-13 22:21:03,373 - verify_comparator - INFO - Running model comparison...
+2026-07-13 22:21:03,373 - ModelComparator - INFO - Initializing model comparison routine...
+2026-07-13 22:21:03,373 - ModelComparator - INFO - Processing details for architecture: Simple RNN
+2026-07-13 22:21:03,409 - ModelComparator - INFO - Loaded evaluation metrics from: D:\MLPs\AG-News-Classification\saved_models\verify_comparator_temp\rnn_metrics.json
+2026-07-13 22:21:03,409 - ModelComparator - INFO - Processing details for architecture: LSTM
+2026-07-13 22:21:03,436 - ModelComparator - INFO - Loaded evaluation metrics from: D:\MLPs\AG-News-Classification\saved_models\verify_comparator_temp\lstm_metrics.json
+2026-07-13 22:21:03,437 - ModelComparator - INFO - Processing details for architecture: BiLSTM + Self-Attention
+2026-07-13 22:21:03,483 - ModelComparator - INFO - Loaded evaluation metrics from: D:\MLPs\AG-News-Classification\saved_models\verify_comparator_temp\attention_metrics.json
+2026-07-13 22:21:03,483 - ModelComparator - INFO - Processing details for architecture: BERT Transformer
+2026-07-13 22:21:21,776 - tensorflow - WARNING - From C:\Users\admin\AppData\Local\Programs\Python\Python312\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2026-07-13 22:21:25,691 - ModelComparator - INFO - Loaded evaluation metrics from: D:\MLPs\AG-News-Classification\saved_models\verify_comparator_temp\bert_metrics.json
+2026-07-13 22:21:25,704 - ModelComparator - INFO - Automatically identified best model: 'BERT Transformer' based on F1-Score (Macro) (0.9050)
+2026-07-13 22:21:25,710 - ModelComparator - INFO - Consolidated comparisons saved to CSV: D:\MLPs\AG-News-Classification\saved_models\verify_comparator_temp\mock_comparison.csv
+2026-07-13 22:21:25,717 - src.utils.file_io - INFO - JSON file saved successfully at: D:\MLPs\AG-News-Classification\saved_models\verify_comparator_temp\mock_comparison.json
+2026-07-13 22:21:25,717 - ModelComparator - INFO - Consolidated comparisons saved to JSON: D:\MLPs\AG-News-Classification\saved_models\verify_comparator_temp\mock_comparison.json
+2026-07-13 22:21:25,730 - verify_comparator - INFO - Cleaning up mock files...
+2026-07-13 22:21:25,735 - verify_comparator - INFO - Cleanup complete.

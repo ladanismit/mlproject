@@ -1,0 +1,49 @@
+2026-07-13 22:39:56,356 - verify_evaluator - INFO - Creating dummy assets for evaluation testing...
+2026-07-13 22:39:56,775 - tensorflow - WARNING - TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+2026-07-13 22:39:56,783 - absl - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2026-07-13 22:39:56,854 - verify_evaluator - INFO - Dummy model saved to: D:\MLPs\AG-News-Classification\saved_models\verify_temp\dummy_model.h5
+2026-07-13 22:39:56,868 - verify_evaluator - INFO - Dummy tokenizer saved to: D:\MLPs\AG-News-Classification\saved_models\verify_temp\dummy_tokenizer.pkl
+2026-07-13 22:39:56,869 - src.data.label_encoder - INFO - Fitted CustomLabelEncoder on 4 unique classes: [1, 2, 3, 4]
+2026-07-13 22:39:56,871 - verify_evaluator - INFO - Dummy label encoder saved to: D:\MLPs\AG-News-Classification\saved_models\verify_temp\dummy_label_encoder.pkl
+2026-07-13 22:39:56,874 - verify_evaluator - INFO - Initializing NLPEvaluator...
+2026-07-13 22:39:56,879 - NLPEvaluator - INFO - Loading label encoder from: D:\MLPs\AG-News-Classification\saved_models\verify_temp\dummy_label_encoder.pkl
+2026-07-13 22:39:56,881 - src.data.label_encoder - INFO - Loading label encoder from: D:\MLPs\AG-News-Classification\saved_models\verify_temp\dummy_label_encoder.pkl
+2026-07-13 22:39:56,882 - src.utils.file_io - INFO - Pickle file loaded successfully from: D:\MLPs\AG-News-Classification\saved_models\verify_temp\dummy_label_encoder.pkl
+2026-07-13 22:39:56,884 - NLPEvaluator - INFO - Loading Keras Tokenizer from: D:\MLPs\AG-News-Classification\saved_models\verify_temp\dummy_tokenizer.pkl
+2026-07-13 22:39:56,885 - src.utils.file_io - INFO - Pickle file loaded successfully from: D:\MLPs\AG-News-Classification\saved_models\verify_temp\dummy_tokenizer.pkl
+2026-07-13 22:39:56,887 - NLPEvaluator - INFO - Loading Keras model from: D:\MLPs\AG-News-Classification\saved_models\verify_temp\dummy_model.h5
+2026-07-13 22:39:56,956 - absl - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2026-07-13 22:39:56,979 - NLPEvaluator - INFO - Model loaded successfully.
+2026-07-13 22:39:56,990 - NLPEvaluator - INFO - NLPEvaluator successfully initialized for model: 'rnn'
+2026-07-13 22:39:56,991 - verify_evaluator - INFO - Running evaluation...
+2026-07-13 22:39:56,993 - NLPEvaluator - INFO - Starting NLP model evaluation for 4 samples.
+2026-07-13 22:39:56,994 - NLPEvaluator - INFO - Preprocessing 4 samples...
+2026-07-13 22:39:57,002 - src.data.tokenizer_utils - INFO - Converting 4 texts to sequences...
+2026-07-13 22:39:57,007 - NLPEvaluator - INFO - Running batch inference...
+2026-07-13 22:39:57,537 - NLPEvaluator - INFO - Encoding raw class labels using CustomLabelEncoder...
+2026-07-13 22:39:57,538 - src.data.label_encoder - INFO - Encoding 4 labels...
+2026-07-13 22:39:57,539 - NLPEvaluator - INFO - Computing classification metrics...
+2026-07-13 22:39:57,607 - NLPEvaluator - INFO - 
+============================================================
+CLASSIFICATION REPORT:
+============================================================
+              precision    recall  f1-score   support
+
+       World       0.25      1.00      0.40         1
+      Sports       0.00      0.00      0.00         1
+    Business       0.00      0.00      0.00         1
+    Sci/Tech       0.00      0.00      0.00         1
+
+    accuracy                           0.25         4
+   macro avg       0.06      0.25      0.10         4
+weighted avg       0.06      0.25      0.10         4
+============================================================
+
+2026-07-13 22:39:57,616 - src.utils.file_io - INFO - JSON file saved successfully at: D:\MLPs\AG-News-Classification\saved_models\verify_temp\evaluation_results.json
+2026-07-13 22:39:57,616 - NLPEvaluator - INFO - Successfully saved evaluation metrics to: D:\MLPs\AG-News-Classification\saved_models\verify_temp\evaluation_results.json
+2026-07-13 22:39:57,618 - verify_evaluator - INFO - ============================================================
+2026-07-13 22:39:57,620 - verify_evaluator - INFO - VERIFICATION COMPLETED SUCCESSFULLY!
+2026-07-13 22:39:57,621 - verify_evaluator - INFO - Generated Metrics: {'accuracy': 0.25, 'precision_macro': 0.0625, 'recall_macro': 0.25, 'f1_macro': 0.1, 'precision_micro': 0.25, 'recall_micro': 0.25, 'f1_micro': 0.25, 'precision_weighted': 0.0625, 'recall_weighted': 0.25, 'f1_weighted': 0.1, 'classification_report': {'World': {'precision': 0.25, 'recall': 1.0, 'f1-score': 0.4, 'support': 1.0}, 'Sports': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 1.0}, 'Business': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 1.0}, 'Sci/Tech': {'precision': 0.0, 'recall': 0.0, 'f1-score': 0.0, 'support': 1.0}, 'accuracy': 0.25, 'macro avg': {'precision': 0.0625, 'recall': 0.25, 'f1-score': 0.1, 'support': 4.0}, 'weighted avg': {'precision': 0.0625, 'recall': 0.25, 'f1-score': 0.1, 'support': 4.0}}, 'confusion_matrix': [[1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0]]}
+2026-07-13 22:39:57,622 - verify_evaluator - INFO - ============================================================
+2026-07-13 22:39:57,624 - verify_evaluator - INFO - Cleaning up temporary verification assets...
+2026-07-13 22:39:57,630 - verify_evaluator - INFO - Cleanup completed.

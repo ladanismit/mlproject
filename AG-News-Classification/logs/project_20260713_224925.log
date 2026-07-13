@@ -1,0 +1,57 @@
+2026-07-13 22:49:25,841 - verify_predictor - INFO - Creating mock assets for prediction testing...
+2026-07-13 22:49:25,981 - tensorflow - WARNING - TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+2026-07-13 22:49:25,986 - absl - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2026-07-13 22:49:26,028 - verify_predictor - INFO - Dummy model saved: D:\MLPs\AG-News-Classification\saved_models\verify_predict_temp\dummy_rnn_final_model.h5
+2026-07-13 22:49:26,032 - verify_predictor - INFO - Dummy tokenizer saved: D:\MLPs\AG-News-Classification\saved_models\verify_predict_temp\dummy_rnn_tokenizer.pkl
+2026-07-13 22:49:26,032 - src.data.label_encoder - INFO - Fitted CustomLabelEncoder on 4 unique classes: [1, 2, 3, 4]
+2026-07-13 22:49:26,034 - verify_predictor - INFO - Dummy label encoder saved: D:\MLPs\AG-News-Classification\saved_models\verify_predict_temp\dummy_rnn_label_encoder.pkl
+2026-07-13 22:49:26,035 - verify_predictor - INFO - Initializing NLPPredictor...
+2026-07-13 22:49:26,036 - src.data.label_encoder - INFO - Loading label encoder from: D:\MLPs\AG-News-Classification\saved_models\verify_predict_temp\dummy_rnn_label_encoder.pkl
+2026-07-13 22:49:26,036 - src.utils.file_io - INFO - Pickle file loaded successfully from: D:\MLPs\AG-News-Classification\saved_models\verify_predict_temp\dummy_rnn_label_encoder.pkl
+2026-07-13 22:49:26,038 - src.utils.file_io - INFO - Pickle file loaded successfully from: D:\MLPs\AG-News-Classification\saved_models\verify_predict_temp\dummy_rnn_tokenizer.pkl
+2026-07-13 22:49:26,039 - NLPPredictor - INFO - Loading Keras model from: D:\MLPs\AG-News-Classification\saved_models\verify_predict_temp\dummy_rnn_final_model.h5
+2026-07-13 22:49:26,088 - absl - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2026-07-13 22:49:26,095 - NLPPredictor - INFO - NLPPredictor successfully initialized for model: 'rnn'
+2026-07-13 22:49:26,096 - verify_predictor - INFO - Testing Single Prediction...
+2026-07-13 22:49:26,099 - src.data.tokenizer_utils - INFO - Converting 1 texts to sequences...
+2026-07-13 22:49:26,306 - verify_predictor - INFO - Single prediction result:
+{
+    "predicted_class": "Sports",
+    "confidence_score": 0.2655297815799713,
+    "probability_distribution": {
+        "World": 0.24106235802173615,
+        "Sports": 0.2655297815799713,
+        "Business": 0.24714788794517517,
+        "Sci/Tech": 0.24625998735427856
+    }
+}
+2026-07-13 22:49:26,307 - verify_predictor - INFO - Testing Batch Prediction...
+2026-07-13 22:49:26,308 - src.data.tokenizer_utils - INFO - Converting 2 texts to sequences...
+2026-07-13 22:49:26,547 - verify_predictor - INFO - Batch prediction result:
+[
+    {
+        "predicted_class": "Sports",
+        "confidence_score": 0.2670224606990814,
+        "probability_distribution": {
+            "World": 0.24025554955005646,
+            "Sports": 0.2670224606990814,
+            "Business": 0.24674133956432343,
+            "Sci/Tech": 0.24598067998886108
+        }
+    },
+    {
+        "predicted_class": "Sports",
+        "confidence_score": 0.2660267651081085,
+        "probability_distribution": {
+            "World": 0.24079343676567078,
+            "Sports": 0.2660267651081085,
+            "Business": 0.24701261520385742,
+            "Sci/Tech": 0.24616718292236328
+        }
+    }
+]
+2026-07-13 22:49:26,549 - verify_predictor - INFO - ================================================================================
+2026-07-13 22:49:26,550 - verify_predictor - INFO - VERIFICATION COMPLETED SUCCESSFULLY!
+2026-07-13 22:49:26,550 - verify_predictor - INFO - ================================================================================
+2026-07-13 22:49:26,551 - verify_predictor - INFO - Cleaning up mock files...
+2026-07-13 22:49:26,552 - verify_predictor - INFO - Cleanup completed.
