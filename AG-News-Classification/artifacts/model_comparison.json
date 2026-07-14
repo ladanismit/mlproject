@@ -1,0 +1,58 @@
+[
+    {
+        "Model Name": "Simple RNN",
+        "Model Type": "rnn",
+        "Accuracy": null,
+        "Precision (Macro)": null,
+        "Recall (Macro)": null,
+        "F1-Score (Macro)": null,
+        "Precision (Weighted)": null,
+        "Recall (Weighted)": null,
+        "F1-Score (Weighted)": null,
+        "Training Time (Sec)": null,
+        "Parameters": 2010820.0,
+        "Model Size (MB)": 23.04
+    },
+    {
+        "Model Name": "LSTM",
+        "Model Type": "lstm",
+        "Accuracy": null,
+        "Precision (Macro)": null,
+        "Recall (Macro)": null,
+        "F1-Score (Macro)": null,
+        "Precision (Weighted)": null,
+        "Recall (Weighted)": null,
+        "F1-Score (Weighted)": null,
+        "Training Time (Sec)": null,
+        "Parameters": 1059332.0,
+        "Model Size (MB)": 12.15
+    },
+    {
+        "Model Name": "BiLSTM + Self-Attention",
+        "Model Type": "attention",
+        "Accuracy": null,
+        "Precision (Macro)": null,
+        "Recall (Macro)": null,
+        "F1-Score (Macro)": null,
+        "Precision (Weighted)": null,
+        "Recall (Weighted)": null,
+        "F1-Score (Weighted)": null,
+        "Training Time (Sec)": null,
+        "Parameters": 1034884.0,
+        "Model Size (MB)": 11.89
+    },
+    {
+        "Model Name": "BERT Transformer",
+        "Model Type": "bert",
+        "Accuracy": null,
+        "Precision (Macro)": null,
+        "Recall (Macro)": null,
+        "F1-Score (Macro)": null,
+        "Precision (Weighted)": null,
+        "Recall (Weighted)": null,
+        "F1-Score (Weighted)": null,
+        "Training Time (Sec)": null,
+        "Parameters": null,
+        "Model Size (MB)": 530.7
+    }
+]

@@ -1,0 +1,5 @@
+Model Name,Model Type,Accuracy,Precision (Macro),Recall (Macro),F1-Score (Macro),Precision (Weighted),Recall (Weighted),F1-Score (Weighted),Training Time (Sec),Parameters,Model Size (MB)
+Simple RNN,rnn,,,,,,,,,2010820.0,23.04
+LSTM,lstm,,,,,,,,,1059332.0,12.15
+BiLSTM + Self-Attention,attention,,,,,,,,,1034884.0,11.89
+BERT Transformer,bert,,,,,,,,,,530.7
