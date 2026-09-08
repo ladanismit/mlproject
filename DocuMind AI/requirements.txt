@@ -1,0 +1,33 @@
+# API & Web Server
+fastapi
+uvicorn[standard]
+python-multipart
+httpx
+
+# Configuration & Data Validation
+pydantic
+pydantic-settings
+python-dotenv
+
+# LangChain & LLM Providers
+langchain
+langchain-core
+langchain-community
+langchain-openai
+langchain-text-splitters
+openai
+
+# Vector Store
+faiss-cpu
+
+# Document Processing & OCR
+PyMuPDF
+Pillow
+pytesseract
+
+# Frontend
+streamlit
+requests
+
+# Testing
+pytest

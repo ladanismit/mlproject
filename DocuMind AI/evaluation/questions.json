@@ -1,0 +1,187 @@
+{
+  "dataset_name": "DocuMind AI Evaluation Dataset",
+  "version": "1.0",
+  "description": "Evaluation questions for document retrieval, extraction, reasoning, citation, and comparison.",
+  "questions": [
+    {
+      "id": "Q001",
+      "category": "rag",
+      "question": "What is the primary purpose and scope described in this agreement?",
+      "document_type": "contract",
+      "difficulty": "easy",
+      "requires_citation": true,
+      "expected_behavior": "Return a concise summary of the agreement's purpose and scope directly supported by the introductory text of the document."
+    },
+    {
+      "id": "Q002",
+      "category": "rag",
+      "question": "What payment terms and due dates are specified for the invoice?",
+      "document_type": "invoice",
+      "difficulty": "easy",
+      "requires_citation": true,
+      "expected_behavior": "State the payment terms (e.g., Net 30, due on receipt) and exact due date as explicitly mentioned in the invoice context."
+    },
+    {
+      "id": "Q003",
+      "category": "rag",
+      "question": "What are the core duties and responsibilities assigned to the employee in this agreement?",
+      "document_type": "employment_contract",
+      "difficulty": "medium",
+      "requires_citation": true,
+      "expected_behavior": "List the explicit job duties, responsibilities, and reporting hierarchy mentioned in the employment agreement without assuming unlisted obligations."
+    },
+    {
+      "id": "Q004",
+      "category": "rag",
+      "question": "What is the monthly rent amount and when is it due each month according to the rental agreement?",
+      "document_type": "rental_agreement",
+      "difficulty": "easy",
+      "requires_citation": true,
+      "expected_behavior": "Provide the exact monthly rental figure and payment schedule specified in the agreement terms."
+    },
+    {
+      "id": "Q005",
+      "category": "citation",
+      "question": "On which page is the total payable amount mentioned, and what is the exact amount stated?",
+      "document_type": "invoice",
+      "difficulty": "easy",
+      "requires_citation": true,
+      "expected_behavior": "Identify the exact page number where the total amount appears along with the figure, preserving the currency symbol."
+    },
+    {
+      "id": "Q006",
+      "category": "citation",
+      "question": "Which page contains the governing law and dispute resolution clause?",
+      "document_type": "contract",
+      "difficulty": "medium",
+      "requires_citation": true,
+      "expected_behavior": "Provide the specific page number containing the governing jurisdiction and legal dispute terms, citing relevant clause text."
+    },
+    {
+      "id": "Q007",
+      "category": "citation",
+      "question": "Which page specifies the security deposit requirements and refund conditions in the rental agreement?",
+      "document_type": "rental_agreement",
+      "difficulty": "medium",
+      "requires_citation": true,
+      "expected_behavior": "Cite the exact page number and text snippet describing the deposit amount, holding terms, and refund timeline."
+    },
+    {
+      "id": "Q008",
+      "category": "extraction",
+      "question": "What is the invoice number and invoice date mentioned in the document?",
+      "document_type": "invoice",
+      "difficulty": "easy",
+      "requires_citation": true,
+      "expected_behavior": "Extract the exact invoice identifier and issue date as written on the document without alteration."
+    },
+    {
+      "id": "Q009",
+      "category": "extraction",
+      "question": "Who are the legal parties entering into this agreement?",
+      "document_type": "contract",
+      "difficulty": "easy",
+      "requires_citation": true,
+      "expected_behavior": "Extract the full legal names of all disclosing, receiving, or contracting parties identified in the agreement."
+    },
+    {
+      "id": "Q010",
+      "category": "extraction",
+      "question": "What is the property address and survey or parcel number specified in the property agreement?",
+      "document_type": "property_agreement",
+      "difficulty": "medium",
+      "requires_citation": true,
+      "expected_behavior": "Extract the complete physical address and legal parcel/survey identifier exactly as recorded in the property schedule."
+    },
+    {
+      "id": "Q011",
+      "category": "extraction",
+      "question": "What applicant details, including full name, identification number, and contact information, are entered on the form?",
+      "document_type": "form",
+      "difficulty": "easy",
+      "requires_citation": true,
+      "expected_behavior": "Extract the applicant's name, ID number, and contact details exactly as filled in the form fields."
+    },
+    {
+      "id": "Q012",
+      "category": "reasoning",
+      "question": "Based on the itemized line items and stated tax rate, does the calculated sum match the listed total amount?",
+      "document_type": "invoice",
+      "difficulty": "medium",
+      "requires_citation": true,
+      "expected_behavior": "Perform mathematical verification between line items, subtotal, taxes, and final total, highlighting any discrepancy or confirming exact match."
+    },
+    {
+      "id": "Q013",
+      "category": "reasoning",
+      "question": "What is the relationship between the contract effective date and its termination or renewal notice window?",
+      "document_type": "contract",
+      "difficulty": "hard",
+      "requires_citation": true,
+      "expected_behavior": "Analyze the effective date alongside the renewal or termination clause to determine the operational duration and advance notice deadline without external assumptions."
+    },
+    {
+      "id": "Q014",
+      "category": "reasoning",
+      "question": "Under what specific conditions can the employer terminate the employment agreement without severance pay?",
+      "document_type": "employment_contract",
+      "difficulty": "hard",
+      "requires_citation": true,
+      "expected_behavior": "Synthesize the 'for cause' termination provisions from the agreement to detail exact conditions voiding severance entitlement."
+    },
+    {
+      "id": "Q015",
+      "category": "missing_information",
+      "question": "What is the bank account number and SWIFT code for wire transfer payments in this document?",
+      "document_type": "invoice",
+      "difficulty": "medium",
+      "requires_citation": true,
+      "expected_behavior": "Clearly state that banking and wire transfer details are not present in the document rather than inventing or hallucinating account numbers."
+    },
+    {
+      "id": "Q016",
+      "category": "missing_information",
+      "question": "What are the penalties for late delivery specified under the liquidated damages clause?",
+      "document_type": "contract",
+      "difficulty": "medium",
+      "requires_citation": true,
+      "expected_behavior": "Clearly indicate that liquidated damages or delivery penalty clauses are not found in the provided document if omitted."
+    },
+    {
+      "id": "Q017",
+      "category": "comparison",
+      "question": "Which key fields and numerical values differ between the original agreement and the amended version?",
+      "document_type": "multi_document",
+      "difficulty": "hard",
+      "requires_citation": true,
+      "expected_behavior": "Perform a field-by-field comparison between both documents, highlighting mismatched dates, amounts, terms, or added/removed clauses."
+    },
+    {
+      "id": "Q018",
+      "category": "comparison",
+      "question": "Are the billing addresses, vendor names, and total payable amounts identical across both invoices?",
+      "document_type": "multi_document",
+      "difficulty": "medium",
+      "requires_citation": true,
+      "expected_behavior": "Compare vendor details, billing addresses, and invoice totals across both documents, explicitly listing matches and discrepancies."
+    },
+    {
+      "id": "Q019",
+      "category": "cross_document",
+      "question": "Does the purchase order total match the invoiced amount across both documents?",
+      "document_type": "multi_document",
+      "difficulty": "medium",
+      "requires_citation": true,
+      "expected_behavior": "Correlate financial amounts across the purchase order and invoice, verifying whether the billed total aligns with the authorized PO total."
+    },
+    {
+      "id": "Q020",
+      "category": "cross_document",
+      "question": "Is the effective date referenced in the master service agreement consistent with the start date specified in the statement of work?",
+      "document_type": "multi_document",
+      "difficulty": "hard",
+      "requires_citation": true,
+      "expected_behavior": "Evaluate timeline consistency across the master agreement and statement of work, reporting whether effective and commencement dates align."
+    }
+  ]
+}
