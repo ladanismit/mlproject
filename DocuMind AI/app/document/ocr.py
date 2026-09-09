@@ -5,11 +5,11 @@ pages using pytesseract and Pillow, updating ProcessedDocument schemas with
 the extracted textual content and marking OCR execution in document metadata.
 """
 
-import os
 from pathlib import Path
 from PIL import Image
 import pytesseract
 
+from app.core.config import settings
 from app.core.logger import get_logger
 from app.models.schemas import DocumentMetadata, PageContent, ProcessedDocument
 
@@ -37,8 +37,8 @@ class OCRProcessor:
         self.lang = lang
         self.config = config
 
-        # Set custom tesseract executable path from parameter, env var, or system PATH
-        explicit_cmd = tesseract_cmd or os.getenv("TESSERACT_CMD")
+        # Set custom tesseract executable path from parameter, settings, or system PATH
+        explicit_cmd = tesseract_cmd or settings.TESSERACT_CMD
         if explicit_cmd:
             pytesseract.pytesseract.tesseract_cmd = explicit_cmd
 

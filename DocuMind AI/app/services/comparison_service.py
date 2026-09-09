@@ -1,4 +1,4 @@
-﻿"""Document comparison and inconsistency detection service for DocuMind AI.
+"""Document comparison and inconsistency detection service for DocuMind AI.
 
 This module provides deterministic field-by-field comparison and discrepancy analysis
 between two documents (e.g., invoices, contracts, forms, or agreements) by utilizing
@@ -46,12 +46,16 @@ SYNONYM_MAPPING: dict[str, str] = {
     # Parties
     "vendor": "vendor_name",
     "supplier": "vendor_name",
+    "supplier_name": "vendor_name",
     "seller": "vendor_name",
+    "seller_name": "vendor_name",
     "merchant": "vendor_name",
     "service_provider": "vendor_name",
     "buyer": "buyer_name",
     "customer": "buyer_name",
+    "customer_name": "buyer_name",
     "client": "buyer_name",
+    "client_name": "buyer_name",
     "purchaser": "buyer_name",
     # Financial amounts
     "total": "total_amount",

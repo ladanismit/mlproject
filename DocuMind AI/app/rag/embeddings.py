@@ -2,19 +2,19 @@
 
 This module provides the embedding abstraction used to convert document chunks
 and user search queries into vector representations for vector storage,
-FAISS indexing, and semantic retrieval.
+FAISS indexing, and semantic retrieval using Google Gemini embeddings.
 """
 
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
-from langchain_openai import OpenAIEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 from app.core.config import settings
 from app.core.logger import get_logger
 
 logger = get_logger(__name__)
 
-SUPPORTED_PROVIDERS = {"openai"}
+SUPPORTED_PROVIDERS = {"gemini", "google"}
 
 
 class EmbeddingService:
@@ -46,9 +46,10 @@ class EmbeddingService:
         self._embeddings: Embeddings = self._initialize_embeddings()
 
         logger.info(
-            "EmbeddingService initialized successfully (provider=%s, model=%s)",
+            "EmbeddingService initialized successfully (provider=%s, model=%s, key_configured=%s)",
             self.provider,
             self.model_name,
+            bool(settings.GEMINI_API_KEY or settings.GOOGLE_API_KEY),
         )
 
     def _initialize_embeddings(self) -> Embeddings:
@@ -60,17 +61,17 @@ class EmbeddingService:
         Raises:
             ValueError: If required API credentials are not set.
         """
-        if self.provider == "openai":
-            api_key = settings.OPENAI_API_KEY
-            if not api_key or not api_key.strip():
+        if self.provider in SUPPORTED_PROVIDERS:
+            api_key = settings.GEMINI_API_KEY or settings.GOOGLE_API_KEY
+            if not api_key or not api_key.strip() or api_key.strip() == "YOUR_GEMINI_API_KEY_HERE":
                 raise ValueError(
-                    "OPENAI_API_KEY is not configured. Please set OPENAI_API_KEY in your "
-                    "environment or .env file to initialize the OpenAI embedding service."
+                    "GEMINI_API_KEY is not configured. Please set GEMINI_API_KEY in your "
+                    "environment or .env file to initialize the Gemini embedding service."
                 )
 
-            return OpenAIEmbeddings(
+            return GoogleGenerativeAIEmbeddings(
                 model=self.model_name,
-                api_key=api_key,
+                google_api_key=api_key.strip(),
             )
 
         raise ValueError(f"Unhandled provider: {self.provider}")

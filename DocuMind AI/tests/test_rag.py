@@ -187,24 +187,25 @@ def test_embeddings_unsupported_provider() -> None:
 
 
 def test_embeddings_missing_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Verify EmbeddingService raises ValueError when OPENAI_API_KEY is not configured."""
-    monkeypatch.setattr(settings, "OPENAI_API_KEY", "")
-    with pytest.raises(ValueError, match="OPENAI_API_KEY is not configured"):
-        EmbeddingService(provider="openai")
+    """Verify EmbeddingService raises ValueError when GEMINI_API_KEY is not configured."""
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "")
+    monkeypatch.setattr(settings, "GOOGLE_API_KEY", "")
+    with pytest.raises(ValueError, match="GEMINI_API_KEY is not configured"):
+        EmbeddingService(provider="gemini")
 
 
 def test_embeddings_initialization_success(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Verify EmbeddingService instantiates OpenAIEmbeddings when key is provided."""
-    monkeypatch.setattr(settings, "OPENAI_API_KEY", "sk-mock-test-key")
-    mock_openai_cls = MagicMock()
-    monkeypatch.setattr("app.rag.embeddings.OpenAIEmbeddings", mock_openai_cls)
+    """Verify EmbeddingService instantiates GoogleGenerativeAIEmbeddings when key is provided."""
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "mock-test-key")
+    mock_gemini_cls = MagicMock()
+    monkeypatch.setattr("app.rag.embeddings.GoogleGenerativeAIEmbeddings", mock_gemini_cls)
 
-    service = EmbeddingService(provider="openai", model_name="text-embedding-3-small")
-    assert service.provider == "openai"
-    assert service.model_name == "text-embedding-3-small"
-    mock_openai_cls.assert_called_once_with(
-        model="text-embedding-3-small",
-        api_key="sk-mock-test-key",
+    service = EmbeddingService(provider="gemini", model_name="models/text-embedding-004")
+    assert service.provider == "gemini"
+    assert service.model_name == "models/text-embedding-004"
+    mock_gemini_cls.assert_called_once_with(
+        model="models/text-embedding-004",
+        google_api_key="mock-test-key",
     )
 
 
@@ -212,37 +213,37 @@ def test_embed_documents_and_query(
     monkeypatch: pytest.MonkeyPatch, sample_chunks: list[Document]
 ) -> None:
     """Verify embed_documents and embed_query delegate correctly to underlying embeddings."""
-    monkeypatch.setattr(settings, "OPENAI_API_KEY", "sk-mock-test-key")
-    mock_openai_instance = MagicMock()
-    mock_openai_instance.embed_documents.return_value = [[0.1, 0.2], [0.3, 0.4]]
-    mock_openai_instance.embed_query.return_value = [0.1, 0.2]
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "mock-test-key")
+    mock_gemini_instance = MagicMock()
+    mock_gemini_instance.embed_documents.return_value = [[0.1, 0.2], [0.3, 0.4]]
+    mock_gemini_instance.embed_query.return_value = [0.1, 0.2]
     monkeypatch.setattr(
-        "app.rag.embeddings.OpenAIEmbeddings",
-        lambda **kwargs: mock_openai_instance,
+        "app.rag.embeddings.GoogleGenerativeAIEmbeddings",
+        lambda **kwargs: mock_gemini_instance,
     )
 
-    service = EmbeddingService(provider="openai")
+    service = EmbeddingService(provider="gemini")
 
     # Test embed_documents
     vectors = service.embed_documents(sample_chunks)
     assert len(vectors) == 2
-    mock_openai_instance.embed_documents.assert_called_once_with(
+    mock_gemini_instance.embed_documents.assert_called_once_with(
         [chunk.page_content for chunk in sample_chunks]
     )
 
     # Test embed_query
     query_vec = service.embed_query("Invoice total?")
     assert query_vec == [0.1, 0.2]
-    mock_openai_instance.embed_query.assert_called_once_with("Invoice total?")
+    mock_gemini_instance.embed_query.assert_called_once_with("Invoice total?")
 
 
 def test_embed_query_validation() -> None:
     """Verify embed_query rejects empty strings."""
     monkeypatch = pytest.MonkeyPatch()
-    monkeypatch.setattr(settings, "OPENAI_API_KEY", "sk-mock-test-key")
-    monkeypatch.setattr("app.rag.embeddings.OpenAIEmbeddings", lambda **kwargs: MagicMock())
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "mock-test-key")
+    monkeypatch.setattr("app.rag.embeddings.GoogleGenerativeAIEmbeddings", lambda **kwargs: MagicMock())
 
-    service = EmbeddingService(provider="openai")
+    service = EmbeddingService(provider="gemini")
     with pytest.raises(ValueError, match="Query must be a non-empty string"):
         service.embed_query("   ")
 
@@ -436,7 +437,7 @@ def test_rag_pipeline_successful_answer(
     monkeypatch: pytest.MonkeyPatch, sample_chunks: list[Document]
 ) -> None:
     """Verify RAGPipeline builds grounded context, queries LLM, and formats citations."""
-    monkeypatch.setattr(settings, "OPENAI_API_KEY", "sk-mock-test-key")
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "mock-test-key")
 
     mock_retriever = MagicMock(spec=DocumentRetriever)
     mock_retriever.retrieve_with_scores.return_value = [
@@ -449,7 +450,7 @@ def test_rag_pipeline_successful_answer(
 
     mock_chat_model = MagicMock()
     mock_chat_model.invoke.return_value = mock_llm_response
-    monkeypatch.setattr("app.rag.pipeline.ChatOpenAI", lambda **kwargs: mock_chat_model)
+    monkeypatch.setattr("app.rag.pipeline.ChatGoogleGenerativeAI", lambda **kwargs: mock_chat_model)
 
     pipeline = RAGPipeline(retriever=mock_retriever)
     # Mock chain invocation directly
@@ -476,8 +477,8 @@ def test_rag_pipeline_successful_answer(
 
 def test_rag_pipeline_deduplicates_sources(monkeypatch: pytest.MonkeyPatch) -> None:
     """Verify RAGPipeline deduplicates identical citation snippets from the same page."""
-    monkeypatch.setattr(settings, "OPENAI_API_KEY", "sk-mock-test-key")
-    monkeypatch.setattr("app.rag.pipeline.ChatOpenAI", lambda **kwargs: MagicMock())
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "mock-test-key")
+    monkeypatch.setattr("app.rag.pipeline.ChatGoogleGenerativeAI", lambda **kwargs: MagicMock())
 
     duplicate_chunk = Document(
         page_content="Identical snippet content",
@@ -505,8 +506,8 @@ def test_rag_pipeline_deduplicates_sources(monkeypatch: pytest.MonkeyPatch) -> N
 
 def test_rag_pipeline_empty_retrieval_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
     """Verify RAGPipeline returns fallback response when no relevant chunks are found."""
-    monkeypatch.setattr(settings, "OPENAI_API_KEY", "sk-mock-test-key")
-    monkeypatch.setattr("app.rag.pipeline.ChatOpenAI", lambda **kwargs: MagicMock())
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "mock-test-key")
+    monkeypatch.setattr("app.rag.pipeline.ChatGoogleGenerativeAI", lambda **kwargs: MagicMock())
 
     mock_retriever = MagicMock(spec=DocumentRetriever)
     mock_retriever.retrieve_with_scores.return_value = []

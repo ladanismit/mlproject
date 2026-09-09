@@ -53,7 +53,7 @@ class TextPreprocessor:
 
             # Reconstruct consolidated full_text from processed pages
             cleaned_full_text = "\n\n".join(
-                page.text for page in cleaned_pages
+                page.text for page in cleaned_pages if page.text
             )
 
             final_char_count = len(cleaned_full_text)

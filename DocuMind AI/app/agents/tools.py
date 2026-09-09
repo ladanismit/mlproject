@@ -1,4 +1,4 @@
-﻿"""LangChain agent tools for DocuMind AI.
+"""LangChain agent tools for DocuMind AI.
 
 This module exposes core document intelligence capabilities (grounded RAG question
 answering and structured entity extraction) as standard LangChain tools for autonomous
@@ -17,8 +17,15 @@ from app.services.extraction_service import ExtractionService
 logger = get_logger(__name__)
 
 # Module-level reusable service singletons
-rag_pipeline = RAGPipeline()
-extraction_service = ExtractionService()
+try:
+    rag_pipeline = RAGPipeline()
+except Exception:
+    rag_pipeline = None
+
+try:
+    extraction_service = ExtractionService()
+except Exception:
+    extraction_service = None
 
 
 def _parse_document_text(document_text: str) -> list[PageContent]:
@@ -162,7 +169,8 @@ def document_question_answering(
     )
 
     try:
-        response = rag_pipeline.answer(
+        pipeline = rag_pipeline if rag_pipeline is not None else RAGPipeline()
+        response = pipeline.answer(
             question=question.strip(),
             top_k=top_k,
             document_ids=document_ids,
@@ -238,7 +246,8 @@ def extract_document_fields(
             document_type=document_type,
         )
 
-        extraction_result = extraction_service.extract_from_document(
+        service = extraction_service if extraction_service is not None else ExtractionService()
+        extraction_result = service.extract_from_document(
             document=processed_doc,
             document_type=document_type,
         )

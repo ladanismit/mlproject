@@ -2,12 +2,12 @@
 
 This module orchestrates semantic retrieval, context formulation, grounded prompt
 generation, LLM inference, and page-level source citation synthesis to produce
-structured ChatResponse outputs.
+structured ChatResponse outputs using Google Gemini models.
 """
 
 from langchain_core.documents import Document
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 from app.core.config import settings
 from app.core.logger import get_logger
@@ -16,7 +16,7 @@ from app.rag.retriever import DocumentRetriever
 
 logger = get_logger(__name__)
 
-SUPPORTED_LLM_PROVIDERS = {"openai"}
+SUPPORTED_LLM_PROVIDERS = {"gemini", "google"}
 
 SYSTEM_PROMPT = """You are DocuMind AI, an intelligent and precise document analysis assistant.
 
@@ -83,33 +83,34 @@ class RAGPipeline:
         )
 
         logger.info(
-            "RAGPipeline initialized (provider=%s, model=%s, temperature=%.2f)",
+            "RAGPipeline initialized (provider=%s, model=%s, temperature=%.2f, key_configured=%s)",
             self.provider,
             self.model_name,
             self.temperature,
+            bool(settings.GEMINI_API_KEY or settings.GOOGLE_API_KEY),
         )
 
-    def _initialize_llm(self) -> ChatOpenAI:
+    def _initialize_llm(self) -> ChatGoogleGenerativeAI:
         """Instantiate and configure the LLM client.
 
         Returns:
-            ChatOpenAI: Configured LangChain chat model.
+            ChatGoogleGenerativeAI: Configured LangChain chat model.
 
         Raises:
             ValueError: If required API credentials are missing.
         """
-        if self.provider == "openai":
-            api_key = settings.OPENAI_API_KEY
-            if not api_key or not api_key.strip():
+        if self.provider in SUPPORTED_LLM_PROVIDERS:
+            api_key = settings.GEMINI_API_KEY or settings.GOOGLE_API_KEY
+            if not api_key or not api_key.strip() or api_key.strip() == "YOUR_GEMINI_API_KEY_HERE":
                 raise ValueError(
-                    "OPENAI_API_KEY is not configured. Please set OPENAI_API_KEY in your "
+                    "GEMINI_API_KEY is not configured. Please set GEMINI_API_KEY in your "
                     "environment or .env file to initialize the RAG pipeline."
                 )
 
-            return ChatOpenAI(
+            return ChatGoogleGenerativeAI(
                 model=self.model_name,
                 temperature=self.temperature,
-                api_key=api_key,
+                google_api_key=api_key.strip(),
             )
 
         raise ValueError(f"Unhandled LLM provider: {self.provider}")

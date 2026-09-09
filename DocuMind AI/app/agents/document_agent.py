@@ -1,14 +1,18 @@
-﻿"""Document Analysis Agent for DocuMind AI.
+"""Document Analysis Agent for DocuMind AI.
 
 This module provides the primary autonomous tool-calling agent that routes user
 requests to specialized document intelligence tools (grounded RAG question answering
-and structured entity extraction) to produce accurate, evidence-backed answers.
+and structured entity extraction) to produce accurate, evidence-backed answers using Google Gemini.
 """
 
 from typing import Any
-from langchain.agents import AgentExecutor, create_tool_calling_agent
+
+try:
+    from langchain.agents import AgentExecutor, create_tool_calling_agent
+except ImportError:
+    from langchain_classic.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 from app.agents.tools import (
     document_question_answering,
@@ -68,15 +72,15 @@ class DocumentAgent:
         Raises:
             ValueError: If the configured LLM provider is unsupported or credentials are missing.
         """
-        if settings.LLM_PROVIDER.lower() != "openai":
+        if settings.LLM_PROVIDER.lower() not in {"gemini", "google"}:
             raise ValueError(
-                f"Unsupported LLM provider '{settings.LLM_PROVIDER}'. DocumentAgent currently supports 'openai' only."
+                f"Unsupported LLM provider '{settings.LLM_PROVIDER}'. DocumentAgent currently supports 'gemini' only."
             )
 
-        api_key = settings.OPENAI_API_KEY
-        if not api_key or not api_key.strip():
+        api_key = settings.GEMINI_API_KEY or settings.GOOGLE_API_KEY
+        if not api_key or not api_key.strip() or api_key.strip() == "YOUR_GEMINI_API_KEY_HERE":
             raise ValueError(
-                "OPENAI_API_KEY is not configured. Please set OPENAI_API_KEY in your environment or .env file."
+                "GEMINI_API_KEY is not configured. Please set GEMINI_API_KEY in your environment or .env file."
             )
 
         self.model_name = model or settings.LLM_MODEL
@@ -84,10 +88,10 @@ class DocumentAgent:
             settings.LLM_TEMPERATURE if temperature is None else temperature
         )
 
-        self.llm = ChatOpenAI(
+        self.llm = ChatGoogleGenerativeAI(
             model=self.model_name,
             temperature=self.temperature,
-            api_key=api_key,
+            google_api_key=api_key.strip(),
         )
 
         if tools is not None:
@@ -123,10 +127,11 @@ class DocumentAgent:
         )
 
         logger.info(
-            "DocumentAgent initialized successfully (model=%s, temperature=%.2f, tools_count=%d)",
+            "DocumentAgent initialized successfully (model=%s, temperature=%.2f, tools_count=%d, key_configured=%s)",
             self.model_name,
             self.temperature,
             len(self.tools),
+            bool(settings.GEMINI_API_KEY or settings.GOOGLE_API_KEY),
         )
 
     def _build_document_context(
@@ -137,62 +142,62 @@ class DocumentAgent:
         document_text: str | None = None,
         document_ids: list[str] | None = None,
     ) -> str:
-        """Format provided document parameters into a clear context block for the agent.
+        """Construct structured metadata and text context for the agent prompt.
 
         Args:
             document_id: Optional primary document ID.
-            filename: Optional primary document filename.
-            document_type: Optional document category hint.
-            document_text: Optional complete text of the document.
-            document_ids: Optional list of target document IDs.
+            filename: Optional original document filename.
+            document_type: Optional classification type or category hint.
+            document_text: Optional full document text.
+            document_ids: Optional collection of document IDs available for retrieval.
 
         Returns:
-            str: Human-readable document context string.
+            str: Standardized document context header.
         """
-        lines = [
-            f"Document ID: {document_id.strip() if document_id else 'Not provided'}",
-            f"Filename: {filename.strip() if filename else 'Not provided'}",
-            f"Document Type Hint: {document_type.strip() if document_type else 'Not provided'}",
-        ]
+        context_lines: list[str] = []
+
+        context_lines.append(f"Document ID: {document_id or 'Not provided'}")
+        context_lines.append(f"Filename: {filename or 'Not provided'}")
+        context_lines.append(f"Document Type Hint: {document_type or 'Not provided'}")
 
         if document_ids:
-            clean_ids = [str(did).strip() for did in document_ids if str(did).strip()]
-            lines.append(f"Available Document IDs for Retrieval: {', '.join(clean_ids) if clean_ids else 'Not provided'}")
+            doc_id_list = ", ".join(document_ids)
+            context_lines.append(f"Available Document IDs for Retrieval: {doc_id_list}")
         else:
-            lines.append("Available Document IDs for Retrieval: Not provided (search all indexed documents)")
+            context_lines.append("Available Document IDs for Retrieval: Not provided (search all indexed documents)")
 
         if document_text and document_text.strip():
-            lines.append(f"Full Document Text:\n{document_text.strip()}")
+            context_lines.append(f"Full Document Text:\n{document_text.strip()}")
         else:
-            lines.append("Full Document Text: Not provided")
+            context_lines.append("Full Document Text: Not provided")
 
-        return "\n".join(lines)
+        return "\n".join(context_lines)
 
     def run(
         self,
         question: str,
-        document_ids: list[str] | None = None,
-        document_text: str | None = None,
         document_id: str | None = None,
         filename: str | None = None,
         document_type: str | None = None,
+        document_text: str | None = None,
+        document_ids: list[str] | None = None,
     ) -> str:
-        """Execute the agent loop to analyze documents and answer user questions.
+        """Execute the agent loop to analyze document context and answer user query.
 
         Args:
-            question: The user query or instruction.
-            document_ids: Optional list of document IDs to scope retrieval.
-            document_text: Optional full document text (required for structured extraction).
-            document_id: Optional unique identifier for the current document.
-            filename: Optional original filename of the document.
-            document_type: Optional classification type of the document.
+            question: Natural language question or instruction.
+            document_id: Optional primary document ID.
+            filename: Optional filename of primary document.
+            document_type: Optional document type hint.
+            document_text: Optional raw or formatted text of the document.
+            document_ids: Optional list of document IDs to scope vector retrieval.
 
         Returns:
-            str: The final agent response.
+            str: Grounded textual answer or structured JSON result generated by the agent.
 
         Raises:
-            ValueError: If the question is empty or invalid.
-            RuntimeError: If agent execution fails or returns an empty response.
+            ValueError: If input question is empty or document_ids structure is invalid.
+            RuntimeError: If the agent execution loop fails.
         """
         if not isinstance(question, str) or not question.strip():
             raise ValueError("Question must be a non-empty string.")
@@ -200,8 +205,7 @@ class DocumentAgent:
         if document_ids is not None:
             if not isinstance(document_ids, list):
                 raise ValueError("document_ids must be a list of strings if provided.")
-
-            if not all(isinstance(document_id, str) for document_id in document_ids):
+            if not all(isinstance(d, str) for d in document_ids):
                 raise ValueError("Every document_id must be a string.")
 
         clean_question = question.strip()
@@ -218,7 +222,7 @@ class DocumentAgent:
             len(clean_question),
             len(document_ids) if document_ids else 0,
             bool(document_text and document_text.strip()),
-            filename or "None",
+            filename,
         )
 
         try:
@@ -228,20 +232,19 @@ class DocumentAgent:
                     "document_context": doc_context,
                 }
             )
-
-            output = result.get("output")
-            if not output or not str(output).strip():
-                raise RuntimeError("Document agent returned an empty response.")
-
-            final_output = str(output).strip()
-            logger.info("DocumentAgent run completed successfully.")
-            return final_output
-
         except ValueError:
             raise
         except Exception as exc:
             logger.exception("Document agent execution encountered an unhandled failure.")
             raise RuntimeError("Document agent execution failed.") from exc
+
+        output = result.get("output")
+        if not output or not str(output).strip():
+            raise RuntimeError("Document agent returned an empty response.")
+
+        final_output = str(output).strip()
+        logger.info("DocumentAgent run completed successfully.")
+        return final_output
 
 
 __all__ = ["DocumentAgent"]

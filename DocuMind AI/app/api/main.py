@@ -195,7 +195,7 @@ def _ensure_upload_directory() -> Path:
     return upload_dir
 
 
-async def _save_upload_file(file: UploadFile) -> Path:
+def _save_upload_file(file: UploadFile) -> Path:
     """Safely validate, sanitize, and persist an uploaded file to disk.
 
     Args:
@@ -225,7 +225,7 @@ async def _save_upload_file(file: UploadFile) -> Path:
         )
 
     try:
-        contents = await file.read()
+        contents = file.file.read()
     except Exception as exc:
         logger.error("Failed to read uploaded file '%s': %s", original_name, exc)
         raise HTTPException(
@@ -233,7 +233,7 @@ async def _save_upload_file(file: UploadFile) -> Path:
             detail="Failed to read uploaded file.",
         ) from exc
     finally:
-        await file.close()
+        file.file.close()
 
     # Verify that file is not empty
     if not contents or len(contents) == 0:
@@ -298,6 +298,21 @@ def _load_and_preprocess_document(file_path: Path) -> ProcessedDocument:
 # =====================================================================
 
 @app.get(
+    "/",
+    summary="Root Endpoint",
+    tags=["System"],
+)
+async def root() -> dict[str, str]:
+    """Root endpoint welcoming users and directing them to API documentation."""
+    return {
+        "message": "Welcome to DocuMind AI API",
+        "docs": "/docs",
+        "redoc": "/redoc",
+        "health": "/health",
+    }
+
+
+@app.get(
     "/health",
     response_model=HealthResponse,
     summary="Health Check",
@@ -322,7 +337,7 @@ async def upload_document(
     original_filename = Path(file.filename or "unknown").name
     logger.info("Received document upload request for '%s'", original_filename)
 
-    saved_path = await _save_upload_file(file)
+    saved_path = _save_upload_file(file)
     processed_doc = _load_and_preprocess_document(saved_path)
 
     chunker = get_document_chunker()
@@ -426,7 +441,7 @@ async def extract_document_structure(
     original_filename = Path(file.filename or "unknown").name
     logger.info("Received structured extraction request for '%s'", original_filename)
 
-    saved_path = await _save_upload_file(file)
+    saved_path = _save_upload_file(file)
     processed_doc = _load_and_preprocess_document(saved_path)
 
     extraction_service = get_extraction_service()
@@ -466,8 +481,8 @@ async def compare_documents(
     fn2 = Path(file2.filename or "file2").name
     logger.info("Received document comparison request for '%s' and '%s'", fn1, fn2)
 
-    saved_path1 = await _save_upload_file(file1)
-    saved_path2 = await _save_upload_file(file2)
+    saved_path1 = _save_upload_file(file1)
+    saved_path2 = _save_upload_file(file2)
 
     doc1 = _load_and_preprocess_document(saved_path1)
     doc2 = _load_and_preprocess_document(saved_path2)

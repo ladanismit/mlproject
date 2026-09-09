@@ -1,14 +1,14 @@
-﻿"""Structured document information extraction service for DocuMind AI.
+"""Structured document information extraction service for DocuMind AI.
 
 This module provides generic, page-aware entity and key-value extraction from
 processed documents (invoices, contracts, forms, and general business documents)
-using LLM structured outputs with strict schema validation.
+using LLM structured outputs with strict schema validation powered by Google Gemini.
 """
 
 from typing import Any
 from pydantic import BaseModel, Field
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 from app.core.config import settings
 from app.core.logger import get_logger
@@ -16,7 +16,7 @@ from app.models.schemas import ExtractedField, ProcessedDocument
 
 logger = get_logger(__name__)
 
-SUPPORTED_LLM_PROVIDERS = {"openai"}
+SUPPORTED_LLM_PROVIDERS = {"gemini", "google"}
 MAX_EXTRACTION_TEXT_LENGTH = 30000
 
 EXTRACTION_SYSTEM_PROMPT = """You are DocuMind AI, a structured document information extraction engine.
@@ -107,43 +107,40 @@ class ExtractionService:
         self.prompt_template = self._build_prompt()
 
         logger.info(
-            "ExtractionService initialized (provider=%s, model=%s, temperature=%.2f)",
+            "ExtractionService initialized (provider=%s, model=%s, temperature=%.2f, key_configured=%s)",
             self.provider,
             self.model_name,
             self.temperature,
+            bool(settings.GEMINI_API_KEY or settings.GOOGLE_API_KEY),
         )
 
-    def _initialize_llm(self) -> ChatOpenAI:
+    def _initialize_llm(self) -> ChatGoogleGenerativeAI:
         """Configure and instantiate the underlying chat LLM.
 
         Returns:
-            ChatOpenAI: Initialized LangChain chat model.
+            ChatGoogleGenerativeAI: Initialized LangChain chat model.
 
         Raises:
             ValueError: If API credentials are not set.
         """
-        if self.provider == "openai":
-            api_key = settings.OPENAI_API_KEY
-            if not api_key or not api_key.strip():
+        if self.provider in SUPPORTED_LLM_PROVIDERS:
+            api_key = settings.GEMINI_API_KEY or settings.GOOGLE_API_KEY
+            if not api_key or not api_key.strip() or api_key.strip() == "YOUR_GEMINI_API_KEY_HERE":
                 raise ValueError(
-                    "OPENAI_API_KEY is not configured. Please configure OPENAI_API_KEY "
+                    "GEMINI_API_KEY is not configured. Please configure GEMINI_API_KEY "
                     "in your environment or .env file."
                 )
 
-            return ChatOpenAI(
+            return ChatGoogleGenerativeAI(
                 model=self.model_name,
                 temperature=self.temperature,
-                api_key=api_key,
+                google_api_key=api_key.strip(),
             )
 
         raise ValueError(f"Unhandled LLM provider: {self.provider}")
 
     def _build_prompt(self) -> ChatPromptTemplate:
-        """Construct the prompt template for structured extraction.
-
-        Returns:
-            ChatPromptTemplate: Formatted chat prompt template.
-        """
+        """Construct the prompt template for structured extraction."""
         return ChatPromptTemplate.from_messages(
             [
                 ("system", EXTRACTION_SYSTEM_PROMPT),
@@ -152,51 +149,45 @@ class ExtractionService:
         )
 
     def _prepare_document_text(self, document: ProcessedDocument) -> str:
-        """Format document text page-by-page and apply length limits if necessary.
+        """Format and bound the document text by page for structured extraction.
 
         Args:
-            document: ProcessedDocument containing page contents.
+            document: ProcessedDocument containing page content.
 
         Returns:
-            str: Page-delimited document text prepared for LLM analysis.
+            str: Page-formatted document text.
 
         Raises:
-            ValueError: If the document does not contain any usable text.
+            ValueError: If the document contains no readable text content.
         """
-        page_sections: list[str] = []
+        if not document.pages and not document.full_text:
+            raise ValueError(f"Document '{document.metadata.filename}' contains no readable text.")
 
-        for page in document.pages:
-            text = page.text.strip() if page.text else ""
-            if text:
-                page_sections.append(f"[Page {page.page_number}]\n{text}")
+        if document.pages:
+            formatted_pages: list[str] = []
+            for page in document.pages:
+                page_text = page.text.strip() if page.text else ""
+                if page_text:
+                    formatted_pages.append(f"[Page {page.page_number}]\n{page_text}")
 
-        combined_text = "\n\n".join(page_sections).strip()
+            content = "\n\n".join(formatted_pages)
+        else:
+            content = document.full_text.strip()
 
-        if not combined_text:
-            raise ValueError(
-                f"Document '{document.metadata.filename}' contains no readable text for extraction."
-            )
+        if not content:
+            raise ValueError(f"Document '{document.metadata.filename}' contains only empty whitespace pages.")
 
-        # Apply maximum length limit while preserving header and footer sections
-        if len(combined_text) > MAX_EXTRACTION_TEXT_LENGTH:
-            head_len = MAX_EXTRACTION_TEXT_LENGTH // 2
-            tail_len = MAX_EXTRACTION_TEXT_LENGTH // 2
-            omitted_count = len(combined_text) - (head_len + tail_len)
-
+        # Conservative truncation to prevent token overflow on massive documents
+        if len(content) > MAX_EXTRACTION_TEXT_LENGTH:
             logger.warning(
-                "Document '%s' exceeds max text length (%d chars). Truncating middle section (%d chars omitted).",
+                "Document '%s' content exceeds %d characters (%d chars). Truncating for extraction.",
                 document.metadata.filename,
-                len(combined_text),
-                omitted_count,
+                MAX_EXTRACTION_TEXT_LENGTH,
+                len(content),
             )
+            content = content[:MAX_EXTRACTION_TEXT_LENGTH] + "\n\n[TRUNCATED: Remaining text omitted for extraction]"
 
-            combined_text = (
-                combined_text[:head_len]
-                + f"\n\n[... DOCUMENT TEXT TRUNCATED: {omitted_count} CHARACTERS OMITTED ...]\n\n"
-                + combined_text[-tail_len:]
-            )
-
-        return combined_text
+        return content
 
     def _validate_result(
         self,
@@ -258,10 +249,13 @@ class ExtractionService:
             RuntimeError: If the LLM call or extraction pipeline fails.
         """
         if not isinstance(document, ProcessedDocument):
-            raise ValueError("Input 'document' must be an instance of ProcessedDocument")
+            raise ValueError("Input document must be a ProcessedDocument instance.")
+
+        if not document.metadata or not document.metadata.document_id:
+            raise ValueError("Document is missing valid metadata or document_id.")
 
         doc_id = document.metadata.document_id
-        filename = document.metadata.filename
+        filename = document.metadata.filename or "unknown_document"
         type_hint_str = document_type or document.metadata.source or "Not specified (determine from text)"
 
         logger.info(

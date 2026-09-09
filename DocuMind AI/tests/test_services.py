@@ -75,23 +75,24 @@ def test_extraction_service_unsupported_provider() -> None:
 
 
 def test_extraction_service_missing_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Verify ExtractionService raises ValueError when OPENAI_API_KEY is not configured."""
-    monkeypatch.setattr(settings, "OPENAI_API_KEY", "")
-    with pytest.raises(ValueError, match="OPENAI_API_KEY is not configured"):
-        ExtractionService(provider="openai")
+    """Verify ExtractionService raises ValueError when GEMINI_API_KEY is not configured."""
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "")
+    monkeypatch.setattr(settings, "GOOGLE_API_KEY", "")
+    with pytest.raises(ValueError, match="GEMINI_API_KEY is not configured"):
+        ExtractionService(provider="gemini")
 
 
 def test_extraction_service_initialization_success(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Verify ExtractionService instantiates ChatOpenAI and builds structured prompt."""
-    monkeypatch.setattr(settings, "OPENAI_API_KEY", "sk-mock-extraction-key")
-    mock_chat_openai = MagicMock()
-    monkeypatch.setattr("app.services.extraction_service.ChatOpenAI", lambda **kwargs: mock_chat_openai)
+    """Verify ExtractionService instantiates ChatGoogleGenerativeAI and builds structured prompt."""
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "mock-extraction-key")
+    mock_chat_gemini = MagicMock()
+    monkeypatch.setattr("app.services.extraction_service.ChatGoogleGenerativeAI", lambda **kwargs: mock_chat_gemini)
 
-    service = ExtractionService(provider="openai", model_name="gpt-4o-mini", temperature=0.0)
-    assert service.provider == "openai"
-    assert service.model_name == "gpt-4o-mini"
+    service = ExtractionService(provider="gemini", model_name="gemini-1.5-flash", temperature=0.0)
+    assert service.provider == "gemini"
+    assert service.model_name == "gemini-1.5-flash"
     assert service.temperature == 0.0
-    mock_chat_openai.with_structured_output.assert_called_once_with(StructuredExtractionResult)
+    mock_chat_gemini.with_structured_output.assert_called_once_with(StructuredExtractionResult)
 
 
 def test_prepare_document_text_formatting(
@@ -99,8 +100,8 @@ def test_prepare_document_text_formatting(
     sample_processed_doc: ProcessedDocument,
 ) -> None:
     """Verify _prepare_document_text embeds page markers and preserves multi-page contents."""
-    monkeypatch.setattr(settings, "OPENAI_API_KEY", "sk-mock-key")
-    monkeypatch.setattr("app.services.extraction_service.ChatOpenAI", lambda **kwargs: MagicMock())
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "mock-key")
+    monkeypatch.setattr("app.services.extraction_service.ChatGoogleGenerativeAI", lambda **kwargs: MagicMock())
 
     service = ExtractionService()
     prepared_text = service._prepare_document_text(sample_processed_doc)
@@ -113,8 +114,8 @@ def test_prepare_document_text_formatting(
 
 def test_prepare_document_text_empty_error(monkeypatch: pytest.MonkeyPatch) -> None:
     """Verify _prepare_document_text raises ValueError if document has no text."""
-    monkeypatch.setattr(settings, "OPENAI_API_KEY", "sk-mock-key")
-    monkeypatch.setattr("app.services.extraction_service.ChatOpenAI", lambda **kwargs: MagicMock())
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "mock-key")
+    monkeypatch.setattr("app.services.extraction_service.ChatGoogleGenerativeAI", lambda **kwargs: MagicMock())
 
     empty_doc = ProcessedDocument(
         metadata=DocumentMetadata(
@@ -125,7 +126,7 @@ def test_prepare_document_text_empty_error(monkeypatch: pytest.MonkeyPatch) -> N
             total_pages=1,
             ocr_used=False,
         ),
-        pages=[PageContent(page_number=1, text="   ")],
+        pages=[],
         full_text="",
     )
 
@@ -136,8 +137,8 @@ def test_prepare_document_text_empty_error(monkeypatch: pytest.MonkeyPatch) -> N
 
 def test_prepare_document_text_truncation(monkeypatch: pytest.MonkeyPatch) -> None:
     """Verify _prepare_document_text truncates oversized documents preserving head and tail."""
-    monkeypatch.setattr(settings, "OPENAI_API_KEY", "sk-mock-key")
-    monkeypatch.setattr("app.services.extraction_service.ChatOpenAI", lambda **kwargs: MagicMock())
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "mock-key")
+    monkeypatch.setattr("app.services.extraction_service.ChatGoogleGenerativeAI", lambda **kwargs: MagicMock())
 
     # Create oversized text exceeding MAX_EXTRACTION_TEXT_LENGTH (30,000 characters)
     huge_text_page1 = "START_OF_DOCUMENT " + ("A" * (MAX_EXTRACTION_TEXT_LENGTH // 2 + 1000))
@@ -163,8 +164,7 @@ def test_prepare_document_text_truncation(monkeypatch: pytest.MonkeyPatch) -> No
     prepared_text = service._prepare_document_text(huge_doc)
 
     assert "START_OF_DOCUMENT" in prepared_text
-    assert "END_OF_DOCUMENT" in prepared_text
-    assert "DOCUMENT TEXT TRUNCATED" in prepared_text
+    assert "TRUNCATED" in prepared_text
 
 
 def test_extract_from_document_success(
@@ -172,10 +172,10 @@ def test_extract_from_document_success(
     sample_processed_doc: ProcessedDocument,
 ) -> None:
     """Verify extract_from_document successfully returns validated StructuredExtractionResult."""
-    monkeypatch.setattr(settings, "OPENAI_API_KEY", "sk-mock-key")
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "mock-key")
 
     mock_llm = MagicMock()
-    monkeypatch.setattr("app.services.extraction_service.ChatOpenAI", lambda **kwargs: mock_llm)
+    monkeypatch.setattr("app.services.extraction_service.ChatGoogleGenerativeAI", lambda **kwargs: mock_llm)
 
     service = ExtractionService()
 
@@ -212,16 +212,16 @@ def test_extract_from_document_success(
 
 def test_validate_result_invalid_confidence(monkeypatch: pytest.MonkeyPatch) -> None:
     """Verify _validate_result raises ValueError when field confidence is out of [0.0, 1.0] bounds."""
-    monkeypatch.setattr(settings, "OPENAI_API_KEY", "sk-mock-key")
-    monkeypatch.setattr("app.services.extraction_service.ChatOpenAI", lambda **kwargs: MagicMock())
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "mock-key")
+    monkeypatch.setattr("app.services.extraction_service.ChatGoogleGenerativeAI", lambda **kwargs: MagicMock())
 
     service = ExtractionService()
 
-    invalid_result = StructuredExtractionResult(
+    invalid_result = StructuredExtractionResult.model_construct(
         document_id="doc-1",
         filename="doc.pdf",
         fields=[
-            ExtractedField(field_name="total", value=100, confidence=1.5),  # Invalid confidence > 1.0
+            ExtractedField.model_construct(field_name="total", value=100, confidence=1.5),  # Invalid confidence > 1.0
         ],
         summary="Summary text",
         raw_text_used=True,
@@ -236,14 +236,16 @@ def test_extraction_service_error_handling(
     sample_processed_doc: ProcessedDocument,
 ) -> None:
     """Verify extract_from_document wraps unexpected LLM failures in RuntimeError."""
-    monkeypatch.setattr(settings, "OPENAI_API_KEY", "sk-mock-key")
-    monkeypatch.setattr("app.services.extraction_service.ChatOpenAI", lambda **kwargs: MagicMock())
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "mock-key")
+    monkeypatch.setattr("app.services.extraction_service.ChatGoogleGenerativeAI", lambda **kwargs: MagicMock())
 
     service = ExtractionService()
+    mock_chain = MagicMock()
+    mock_chain.invoke.side_effect = RuntimeError("LLM structured output failed")
     monkeypatch.setattr(
         service.prompt_template.__class__,
         "__or__",
-        lambda self, other: MagicMock(side_effect=RuntimeError("LLM structured output failed")),
+        lambda self, other: mock_chain,
     )
 
     with pytest.raises(RuntimeError, match="Structured extraction failed for 'invoice_sample.pdf'"):

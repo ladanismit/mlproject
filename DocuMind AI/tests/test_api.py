@@ -126,7 +126,7 @@ def test_chat_vector_store_not_found(client: TestClient, monkeypatch: pytest.Mon
 def test_chat_pipeline_internal_error(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
     """Verify POST /chat returns 500 when LLM generation encounters an unexpected error."""
     mock_rag = MagicMock()
-    mock_rag.answer.side_effect = RuntimeError("OpenAI API rate limit exceeded.")
+    mock_rag.answer.side_effect = RuntimeError("API rate limit exceeded.")
     monkeypatch.setattr("app.api.main.get_rag_pipeline", lambda: mock_rag)
 
     response = client.post("/chat", json={"question": "Summarize page 1"})

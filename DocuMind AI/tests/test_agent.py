@@ -25,6 +25,8 @@ from app.models.schemas import (
 from app.services.extraction_service import StructuredExtractionResult
 
 
+from langchain_core.runnables import Runnable
+
 # =====================================================================
 # Fixtures
 # =====================================================================
@@ -32,10 +34,10 @@ from app.services.extraction_service import StructuredExtractionResult
 @pytest.fixture
 def mock_agent_dependencies(monkeypatch: pytest.MonkeyPatch) -> None:
     """Fixture ensuring safe offline initialization of LangChain agent components."""
-    monkeypatch.setattr(settings, "LLM_PROVIDER", "openai")
-    monkeypatch.setattr(settings, "OPENAI_API_KEY", "sk-mock-agent-key")
-    monkeypatch.setattr("app.agents.document_agent.ChatOpenAI", lambda **kwargs: MagicMock())
-    monkeypatch.setattr("app.agents.document_agent.create_tool_calling_agent", lambda **kwargs: MagicMock())
+    monkeypatch.setattr(settings, "LLM_PROVIDER", "gemini")
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "mock-gemini-key")
+    monkeypatch.setattr("app.agents.document_agent.ChatGoogleGenerativeAI", lambda **kwargs: MagicMock())
+    monkeypatch.setattr("app.agents.document_agent.create_tool_calling_agent", lambda **kwargs: MagicMock(spec=Runnable))
 
 
 # =====================================================================
@@ -43,25 +45,26 @@ def mock_agent_dependencies(monkeypatch: pytest.MonkeyPatch) -> None:
 # =====================================================================
 
 def test_agent_unsupported_provider(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Verify DocumentAgent raises ValueError if LLM_PROVIDER is not openai."""
+    """Verify DocumentAgent raises ValueError if LLM_PROVIDER is not gemini."""
     monkeypatch.setattr(settings, "LLM_PROVIDER", "anthropic")
     with pytest.raises(ValueError, match="Unsupported LLM provider 'anthropic'"):
         DocumentAgent()
 
 
 def test_agent_missing_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Verify DocumentAgent raises ValueError when OPENAI_API_KEY is not configured."""
-    monkeypatch.setattr(settings, "LLM_PROVIDER", "openai")
-    monkeypatch.setattr(settings, "OPENAI_API_KEY", "")
-    with pytest.raises(ValueError, match="OPENAI_API_KEY is not configured"):
+    """Verify DocumentAgent raises ValueError when GEMINI_API_KEY is not configured."""
+    monkeypatch.setattr(settings, "LLM_PROVIDER", "gemini")
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "")
+    monkeypatch.setattr(settings, "GOOGLE_API_KEY", "")
+    with pytest.raises(ValueError, match="GEMINI_API_KEY is not configured"):
         DocumentAgent()
 
 
 def test_agent_successful_initialization(mock_agent_dependencies: None) -> None:
     """Verify DocumentAgent initializes with expected model, tools, and max iterations."""
-    agent = DocumentAgent(model="gpt-4o-mini", temperature=0.0)
+    agent = DocumentAgent(model="gemini-1.5-flash", temperature=0.0)
 
-    assert agent.model_name == "gpt-4o-mini"
+    assert agent.model_name == "gemini-1.5-flash"
     assert agent.temperature == 0.0
     assert len(agent.tools) == 2
     assert document_question_answering in agent.tools
@@ -381,7 +384,7 @@ def test_tool_extract_document_fields_validation() -> None:
 def test_tool_extract_document_fields_failure(monkeypatch: pytest.MonkeyPatch) -> None:
     """Verify extract_document_fields wraps service failures in RuntimeError."""
     mock_extractor = MagicMock()
-    mock_extractor.extract_from_document.side_effect = RuntimeError("OpenAI rate limit exceeded")
+    mock_extractor.extract_from_document.side_effect = RuntimeError("LLM rate limit exceeded")
     monkeypatch.setattr("app.agents.tools.extraction_service", mock_extractor)
 
     with pytest.raises(RuntimeError, match="Structured extraction tool failed for 'test.pdf'"):

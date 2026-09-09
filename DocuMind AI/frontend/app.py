@@ -6,9 +6,14 @@ two-document comparison, and autonomous agent-based analysis by communicating
 exclusively with the FastAPI backend endpoints.
 """
 
+import os
 from typing import Any
 import requests
 import streamlit as st
+
+API_HOST = os.getenv("API_HOST", "127.0.0.1")
+API_PORT = os.getenv("API_PORT", "8000")
+DEFAULT_API_URL = os.getenv("API_BASE_URL", f"http://{API_HOST}:{API_PORT}")
 
 # =====================================================================
 # Page Configuration & Constants
@@ -21,7 +26,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-DEFAULT_API_URL = "http://localhost:8000"
 SUPPORTED_FILE_TYPES = ["pdf", "png", "jpg", "jpeg"]
 REQUEST_TIMEOUT_SECONDS = 120
 
@@ -48,7 +52,8 @@ if "last_filename" not in st.session_state:
 
 def _build_url(endpoint: str) -> str:
     """Construct full API URL from base API setting and endpoint path."""
-    base = st.session_state.api_url.rstrip("/")
+    raw_base = st.session_state.get("api_url") or DEFAULT_API_URL
+    base = raw_base.strip().rstrip("/")
     path = endpoint.lstrip("/")
     return f"{base}/{path}"
 
@@ -197,14 +202,13 @@ with st.sidebar:
     st.title("⚙️ Configuration")
 
     st.subheader("API Connection")
-    api_url_input = st.text_input(
+    st.text_input(
         "FastAPI Base URL",
-        value=st.session_state.api_url,
+        key="api_url",
         help="Base address where the DocuMind FastAPI server is hosted.",
     )
-    st.session_state.api_url = api_url_input.strip() or DEFAULT_API_URL
 
-    if st.button("Check API Health", use_container_width=True):
+    if st.button("Check API Health", key="sidebar_health_btn", use_container_width=True):
         with st.spinner("Checking health..."):
             success, result = api_get("/health")
             if success and isinstance(result, dict) and result.get("status") == "healthy":
@@ -284,7 +288,7 @@ with tab_upload:
         with file_details_col2:
             st.info(f"**Size:** {_format_size(uploaded_file.size)}")
 
-        if st.button("Process & Index Document", type="primary", use_container_width=True):
+        if st.button("Process & Index Document", key="btn_upload_index", type="primary", use_container_width=True):
             with st.spinner("Processing document, extracting text, generating embeddings, and updating index..."):
                 file_bytes = uploaded_file.getvalue()
                 success, response = api_post_file(
@@ -334,13 +338,14 @@ with tab_chat:
             value=st.session_state.last_document_id or "",
             placeholder="e.g. 4a12bc90-..., doc-id-2 (leave blank to search all documents)",
             help="Comma-separated list of document IDs to restrict retrieval scope.",
+            key="chat_doc_filter_input",
         )
     with chat_ctrl_col2:
-        top_k_val = st.selectbox("Retrieval Top K", options=[3, 4, 5, 8, 10], index=1)
+        top_k_val = st.selectbox("Retrieval Top K", options=[3, 4, 5, 8, 10], index=1, key="chat_top_k_select")
     with chat_ctrl_col3:
         st.write("")
         st.write("")
-        if st.button("Clear Chat", use_container_width=True):
+        if st.button("Clear Chat", key="btn_clear_chat", use_container_width=True):
             st.session_state.chat_history = []
             st.rerun()
 
@@ -433,12 +438,13 @@ with tab_extract:
             "Document Type Hint",
             options=type_options,
             help="Optional classification hint to guide extraction.",
+            key="extract_type_hint_select",
         )
 
     if extract_file is not None:
         st.info(f"Selected: **{extract_file.name}** ({_format_size(extract_file.size)})")
 
-        if st.button("Extract Structured Information", type="primary", use_container_width=True):
+        if st.button("Extract Structured Information", key="btn_extract_action", type="primary", use_container_width=True):
             with st.spinner("Analyzing document layout and extracting entities..."):
                 form_data = {}
                 if selected_type and selected_type != "Auto Detect":
@@ -513,7 +519,7 @@ with tab_compare:
             st.caption(f"Selected: **{file_b.name}** ({_format_size(file_b.size)})")
 
     if file_a is not None and file_b is not None:
-        if st.button("Run Document Comparison", type="primary", use_container_width=True):
+        if st.button("Run Document Comparison", key="btn_compare_action", type="primary", use_container_width=True):
             with st.spinner("Extracting entities from both documents and checking for mismatches..."):
                 files_payload = {
                     "file1": (file_a.name, file_a.getvalue()),
@@ -600,6 +606,7 @@ with tab_agent:
         "Agent Instruction / Question",
         placeholder="e.g. Find the agreement date and check if the total amount matches between our contracts.",
         height=100,
+        key="agent_question_input",
     )
 
     with st.expander("Advanced Context Configuration (Optional)"):
@@ -607,16 +614,27 @@ with tab_agent:
             "Document IDs (comma-separated)",
             value=st.session_state.last_document_id or "",
             placeholder="e.g. doc-id-1, doc-id-2",
+            key="agent_doc_ids_input",
         )
-        ag_fn = st.text_input("Document Filename", value=st.session_state.last_filename or "", placeholder="e.g. contract.pdf")
-        ag_type = st.text_input("Document Type Hint", placeholder="e.g. contract, invoice")
+        ag_fn = st.text_input(
+            "Document Filename",
+            value=st.session_state.last_filename or "",
+            placeholder="e.g. contract.pdf",
+            key="agent_filename_input",
+        )
+        ag_type = st.text_input(
+            "Document Type Hint",
+            placeholder="e.g. contract, invoice",
+            key="agent_type_hint_input",
+        )
         ag_text = st.text_area(
             "Full Document Text (Required if asking agent to extract all structured fields)",
             placeholder="Paste raw text here if asking the agent to perform structured field extraction on unindexed text...",
             height=120,
+            key="agent_doc_text_input",
         )
 
-    if st.button("Run Agent Analysis", type="primary", use_container_width=True):
+    if st.button("Run Agent Analysis", key="btn_agent_action", type="primary", use_container_width=True):
         if not agent_question.strip():
             st.warning("Please enter a question or instruction for the agent.")
         else:
