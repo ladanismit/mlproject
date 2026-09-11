@@ -48,7 +48,7 @@ API_URL = "http://127.0.0.1:8000"
 api_online = False
 try:
     r_health = requests.get(f"{API_URL}/health", timeout=2)
-    if r_health.status_code == 200 and r_health.json().get("status") == "healthy":
+    if r_health.status_code == 200 and str(r_health.json().get("status", "")).lower() == "healthy":
         api_online = True
 except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
     pass
@@ -94,19 +94,33 @@ if page == "🚗 Valuation Calculator":
 
     # dynamic model filtering based on selected brand
     brand_models = artifacts.get('brand_models', {})
+    if not brand_models:
+        if 'label_encoders' in artifacts and 'oem' in artifacts['label_encoders']:
+            oem_list = list(artifacts['label_encoders']['oem'].classes_)
+            model_list = list(artifacts['label_encoders']['model'].classes_) if 'model' in artifacts['label_encoders'] else ["Swift"]
+            brand_models = {b: model_list for b in oem_list}
+        else:
+            brand_models = {"maruti": ["swift", "baleno", "wagon r", "alto"], "hyundai": ["i20", "creta", "venue", "verna"]}
+
     brands_avail = sorted(list(brand_models.keys()))
+    if not brands_avail:
+        brands_avail = ["maruti", "hyundai", "honda", "toyota"]
 
     col1, col2, col3 = st.columns(3)
 
     with col1:
         st.subheader("🏷️ Identity & Specs")
-        oem_sel = st.selectbox("Brand (OEM)", [b.title() for b in brands_avail])
-        oem_clean = oem_sel.lower().strip()
+        brand_options = [b.title() for b in brands_avail]
+        oem_sel = st.selectbox("Brand (OEM)", brand_options)
+        oem_clean = (oem_sel or brands_avail[0]).lower().strip()
 
         # Filter models based on selected brand
         models_avail = brand_models.get(oem_clean, [])
-        model_sel = st.selectbox("Model", [m.title() for m in models_avail], key=f"model_{oem_clean}")
-        model_clean = model_sel.lower().strip()
+        if not models_avail:
+            models_avail = ["Standard"]
+        model_options = [m.title() for m in models_avail]
+        model_sel = st.selectbox("Model", model_options, key=f"model_{oem_clean}")
+        model_clean = (model_sel or models_avail[0]).lower().strip()
 
         myear = st.slider("Manufacturing Year", min_value=2000, max_value=2026, value=2018)
         fuel = st.selectbox("Fuel Type", ["Petrol", "Diesel", "CNG", "LPG", "Electric"])
